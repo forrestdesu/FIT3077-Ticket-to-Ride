@@ -50,7 +50,7 @@ public class Main {
     }
 
     private void showNameInputScreen(int count) {
-        JFrame frame = createFrame("Enter Names");
+        JFrame frame = createFrame("Enter the Player Names");
 
         JPanel panel = new JPanel(new BorderLayout());
         JPanel fieldsPanel = new JPanel(new GridLayout(count, 1));
