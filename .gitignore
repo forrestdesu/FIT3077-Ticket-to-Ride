@@ -1,25 +1,27 @@
-# ignore all idea settings
-.idea/*
-*.iws
+# IntelliJ IDEA files
+.idea/
 *.iml
+*.iws
 *.ipr
 
-# gradle project minimum
-!.idea/gradle.xml
-!.idea/misc.xml
+# Compiled Java classes (still ignore these)
+*.class
 
-# enable plugin dependencies
-!.idea/externalDependencies.xml
+# Build directories (keep or remove depending on your setup)
+# If your JARs are inside these, DO NOT ignore them
+# /target/
+# /build/
 
-# enable codestyle, with save actions
-!.idea/codeStyles
-!.idea/saveactions_settting.xml
+# Allow JAR files (important if previously ignored)
+!*.jar
 
-# enable inspection rules
-!.idea/inspectionProfiles
+# Allow artifacts (if stored in a specific folder, e.g. /artifacts/)
+!artifacts/
+!artifacts/*.jar
 
-# enable annotation processor for lombok plugin
-!.idea/compiler.xml
+# OS files
+.DS_Store
+Thumbs.db
 
-# enable checkstyle ide
-!.idea/checkstyle-idea.xml
+# Logs
+*.log
