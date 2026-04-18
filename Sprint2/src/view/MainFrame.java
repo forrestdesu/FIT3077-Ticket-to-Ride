@@ -1,4 +1,9 @@
 package src.view;
 
-public class MainFrame {
+import javax.swing.*;
+
+public class MainFrame extends JFrame {
+    MainFrame() {
+
+    }
 }
