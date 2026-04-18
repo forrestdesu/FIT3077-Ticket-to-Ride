@@ -29,7 +29,7 @@
 //    private void showPlayerCountScreen() {
 //        JFrame frame = createFrame("Select Players");
 //
-//        JSlider slider = new JSlider(2, 5, 2);
+//        JSlider slider = nsew JSlider(2, 5, 2);
 //        slider.setMajorTickSpacing(1);
 //        slider.setPaintTicks(true);
 //        slider.setPaintLabels(true);
