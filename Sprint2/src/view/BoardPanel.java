@@ -1,4 +1,11 @@
 package src.view;
 
-public class BoardPanel {
+import javax.swing.*;
+import java.awt.*;
+
+public class BoardPanel extends JPanel {
+    public BoardPanel(){
+        setBorder(BorderFactory.createTitledBorder("Board"));
+        setBackground(Color.WHITE);
+    }
 }

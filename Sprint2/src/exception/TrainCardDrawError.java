@@ -1,4 +1,7 @@
 package src.exception;
 
-public class TrainCardDrawError {
+public class TrainCardDrawError extends Exception{
+    public TrainCardDrawError(String message){
+        super(message);
+    }
 }
