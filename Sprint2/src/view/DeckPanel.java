@@ -15,8 +15,8 @@ public class DeckPanel extends JPanel implements GameObserver {
         this.gameEngine = gameEngine;
         setLayout(new GridLayout(1, 2, 5, 5));
         setBorder(BorderFactory.createTitledBorder("Draw Decks"));
-        trainCarDeckButton = new JButton("<html><center>Train Car<br>Deck (" + gameEngine.getCardDeck().getDrawCardPile().size() + ")</center></html>");
-        destinationDeckButton = new JButton("<html><center>Destination<br>Deck (" + gameEngine.getTicketDeck().ticketDeckSize() + ")</center></html>");
+        trainCarDeckButton = new JButton("<html><center>Train Car Card<br>Deck (" + gameEngine.getCardDeck().getDrawCardPile().size() + ")</center></html>");
+        destinationDeckButton = new JButton("<html><center>Destination Tickets<br>Deck (" + gameEngine.getTicketDeck().ticketDeckSize() + ")</center></html>");
 
         add(trainCarDeckButton);
         add(destinationDeckButton);

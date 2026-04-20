@@ -5,6 +5,7 @@ import src.model.GameEngine;
 import src.model.TrainCarCard;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,12 +22,13 @@ public class FaceUpPanel extends JPanel implements GameObserver {
         setBorder(BorderFactory.createTitledBorder("Face-Up Cards"));
         faceUpCardsButton = new ArrayList<>();
 
-        for (int i = 1; i <= gameEngine.FACE_UP_CARD_COUNT; i++) {
+        for (int i = 1; i <= GameEngine.FACE_UP_CARD_COUNT; i++) {
             JButton btn = new JButton("Card " + i);
             btn.setPreferredSize(new Dimension(80, 50));
             btn.setFont(new Font("Arial", Font.BOLD, 11));
             btn.setFocusPainted(false);
             btn.setOpaque(true);
+            btn.setBorderPainted(true);
             faceUpCardsButton.add(btn);
             add(btn);
         }
@@ -43,14 +45,18 @@ public class FaceUpPanel extends JPanel implements GameObserver {
             JButton btn = faceUpCardsButton.get(i);
             if (i < faceUp.size()) {
                 TrainCarCard card = faceUp.get(i);
-                btn.setText(card.getCardColor().toString());
-                btn.setBackground(cardColorToAwt(card.getCardColor()));
-                btn.setForeground(textColorFor());
+                String label = card.getCardColor() == TrainCarCard.CardColor.LOCOMOTIVE ? "LOCO" : card.getCardColor().toString();
+                btn.setText("<html><center>" + label + "</center></html>");
+                Color bg = cardColorToAwt(card.getCardColor());
+                btn.setBackground(bg);
+                btn.setForeground(textColorFor(card.getCardColor()));
+                btn.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(bg.darker().darker(), 3), BorderFactory.createEmptyBorder(4, 4, 4, 4)));
                 btn.setEnabled(true);
             } else {
                 btn.setText("—");
-                btn.setBackground(Color.LIGHT_GRAY);
+                btn.setBackground(new Color(200, 200, 200));
                 btn.setForeground(Color.DARK_GRAY);
+                btn.setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
                 btn.setEnabled(false);
             }
         }
@@ -71,8 +77,8 @@ public class FaceUpPanel extends JPanel implements GameObserver {
         }
     }
 
-    private Color textColorFor() {
-        return Color.BLACK;
+    private Color textColorFor(TrainCarCard.CardColor color) {
+        return (color == TrainCarCard.CardColor.WHITE || color == TrainCarCard.CardColor.YELLOW) ? Color.BLACK : Color.WHITE;
     }
 
     @Override

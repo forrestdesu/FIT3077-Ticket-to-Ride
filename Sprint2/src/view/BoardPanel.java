@@ -5,12 +5,14 @@ import src.model.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class BoardPanel extends JPanel implements GameObserver {
     private static final int CITY_RADIUS = 10;
-    private static final int CLICK_THRESHOLD = 18;
+    private static final int CLICK_THRESHOLD = 20;
     private static final int DOUBLE_ROUTE_OFFSET = 5;
 
     private final GameEngine gameEngine;
@@ -22,12 +24,45 @@ public class BoardPanel extends JPanel implements GameObserver {
         setBorder(BorderFactory.createTitledBorder("Board"));
         setBackground(Color.WHITE);
 
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                repaint();
+            }
+        });
+
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 handleClick(e.getX(), e.getY());
             }
         });
+    }
+
+    private int drawX(){
+        return getInsets().left + 10;
+    }
+
+    private int drawY(){
+        return getInsets().top + 10;
+    }
+
+    private int drawW(){
+        Insets insets = getInsets();
+        return getWidth() - insets.left - insets.right - 20;
+    }
+
+    private int drawH(){
+        Insets insets = getInsets();
+        return getWidth() - insets.top - insets.bottom - 20;
+    }
+
+    private int toPixelX(City city){
+        return drawX() + (int) (city.getxPercent() / 100.0 * drawW());
+    }
+
+    private int toPixelY(City city){
+        return drawY() + (int) (city.getyPercent() / 100.0 * drawH());
     }
 
     private void handleClick(int mouseX, int mouseY){
@@ -47,10 +82,10 @@ public class BoardPanel extends JPanel implements GameObserver {
     }
 
     private double distToMidpoint(Route route, int mouseX, int mouseY){
-        int x1 = route.getCity1().getPixelX(getWidth());
-        int y1 = route.getCity1().getPixelY(getHeight());
-        int x2 = route.getCity2().getPixelX(getWidth());
-        int y2 = route.getCity2().getPixelY(getHeight());
+        int x1 = toPixelX(route.getCity1());
+        int y1 = toPixelY(route.getCity1());
+        int x2 = toPixelX(route.getCity2());
+        int y2 = toPixelY(route.getCity2());
         int midX = (x1 + x2) / 2;
         int midY = (y1 + y2) / 2;
         return Math.hypot(mouseX - midX, mouseY - midY);
@@ -78,10 +113,10 @@ public class BoardPanel extends JPanel implements GameObserver {
         int w = getWidth();
         int h = getHeight();
 
-        double x1 = route.getCity1().getPixelX(w);
-        double y1 = route.getCity1().getPixelY(h);
-        double x2 = route.getCity2().getPixelX(w);
-        double y2 = route.getCity2().getPixelY(h);
+        double x1 = toPixelX(route.getCity1());
+        double y1 = toPixelY(route.getCity1());
+        double x2 = toPixelX(route.getCity2());
+        double y2 = toPixelY(route.getCity2());
 
         if (route instanceof DoubleRoute) {
             double dx = x2 - x1;
@@ -130,9 +165,14 @@ public class BoardPanel extends JPanel implements GameObserver {
         if (!route.isRouteClaimed()) {
             int midX = (ix1 + ix2) / 2;
             int midY = (iy1 + iy2) / 2;
-            g2.setColor(Color.DARK_GRAY);
-            g2.setFont(getFont().deriveFont(9f));
-            g2.drawString(String.valueOf(route.getRouteLength()), midX + 3, midY - 3);
+            g2.setFont(new Font("Arial", Font.BOLD, 10));
+            FontMetrics fm = g2.getFontMetrics();
+            String lenStr = String.valueOf(route.getRouteLength());
+            int lw = fm.stringWidth(lenStr);
+            g2.setColor(new Color(255, 255, 255, 190));
+            g2.fillRoundRect(midX - lw / 2 - 2, midY - fm.getAscent() - 1, lw + 4, fm.getAscent() + fm.getDescent() + 1, 3, 3);
+            g2.setColor(new Color(40, 40, 40));
+            g2.drawString(lenStr, midX - lw / 2, midY);
         }
     }
 
@@ -153,16 +193,14 @@ public class BoardPanel extends JPanel implements GameObserver {
         g2.setStroke(new BasicStroke(1.5f));
         g2.drawOval(cx - CITY_RADIUS, cy - CITY_RADIUS, CITY_RADIUS * 2, CITY_RADIUS * 2);
 
-        g2.setColor(Color.BLACK);
-        g2.setFont(getFont().deriveFont(9f));
+        g2.setFont(new Font("Arial", Font.BOLD, 10));
         FontMetrics fm = g2.getFontMetrics();
         String label = city.getName();
         int labelX = cx - fm.stringWidth(label) / 2;
-        int labelY = cy + CITY_RADIUS + 11;
-        g2.setColor(new Color(255, 255, 255, 180));
-        g2.fillRect(labelX - 2, labelY - fm.getAscent(), fm.stringWidth(label) + 4,
-                fm.getAscent() + fm.getDescent());
-        g2.setColor(Color.BLACK);
+        int labelY = cy + CITY_RADIUS + 12;
+        g2.setColor(new Color(255, 255, 255, 200));
+        g2.fillRoundRect(labelX - 3, labelY - fm.getAscent() - 1, fm.stringWidth(label) + 6, fm.getAscent() + fm.getDescent() + 2, 4, 4);
+        g2.setColor(new Color(30, 20, 10));
         g2.drawString(label, labelX, labelY);
     }
 
