@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MapDataHandler {
-    private static final String MAP_FILE = "/assets/board_data.json";
+    private static final String MAP_FILE = "src/assets/board_data.json";
 
     public BoardMap loadBoardMap(){
         String json = readFile();
@@ -198,7 +198,7 @@ public class MapDataHandler {
     }
 
     public String extractString(String object, String key){
-        String search = "\"" + key + "\'";
+        String search = "\"" + key + "\"";
         int keyIdx = object.indexOf(search);
         if(keyIdx == -1){
             throw new RuntimeException("Key not found: \"" + key + "\" in: " + object.trim());

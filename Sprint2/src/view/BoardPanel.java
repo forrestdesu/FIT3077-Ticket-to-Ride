@@ -142,28 +142,23 @@ public class BoardPanel extends JPanel implements GameObserver {
         }
     }
 
-    /** Draws a single city as a filled circle with a name label beneath it. */
     private void drawCity(Graphics2D g2, City city) {
         int cx = city.getPixelX(getWidth());
         int cy = city.getPixelY(getHeight());
 
-        // Circle fill — dark brown/maroon
         g2.setColor(new Color(60, 30, 20));
         g2.fillOval(cx - CITY_RADIUS, cy - CITY_RADIUS, CITY_RADIUS * 2, CITY_RADIUS * 2);
 
-        // White border ring
         g2.setColor(Color.WHITE);
         g2.setStroke(new BasicStroke(1.5f));
         g2.drawOval(cx - CITY_RADIUS, cy - CITY_RADIUS, CITY_RADIUS * 2, CITY_RADIUS * 2);
 
-        // Name label, centered horizontally below the circle
         g2.setColor(Color.BLACK);
         g2.setFont(getFont().deriveFont(9f));
         FontMetrics fm = g2.getFontMetrics();
         String label = city.getName();
         int labelX = cx - fm.stringWidth(label) / 2;
         int labelY = cy + CITY_RADIUS + 11;
-        // White background rectangle so label is readable over route lines
         g2.setColor(new Color(255, 255, 255, 180));
         g2.fillRect(labelX - 2, labelY - fm.getAscent(), fm.stringWidth(label) + 4,
                 fm.getAscent() + fm.getDescent());
