@@ -32,6 +32,7 @@ public class PlayerScorePanel extends JPanel implements GameObserver {
             scoreLabels.add(label);
             add(label);
         }
+        refresh();
     }
 
     private void refresh() {
@@ -45,7 +46,6 @@ public class PlayerScorePanel extends JPanel implements GameObserver {
             JLabel lbl = scoreLabels.get(i);
             lbl.setText(text);
 
-            // Underline + larger font for the active player
             if (p == current) {
                 lbl.setFont(new Font("Arial", Font.BOLD, 16));
                 lbl.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0,

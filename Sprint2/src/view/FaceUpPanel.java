@@ -45,7 +45,7 @@ public class FaceUpPanel extends JPanel implements GameObserver {
                 TrainCarCard card = faceUp.get(i);
                 btn.setText(card.getCardColor().toString());
                 btn.setBackground(cardColorToAwt(card.getCardColor()));
-                btn.setForeground(textColorFor(card.getCardColor()));
+                btn.setForeground(textColorFor());
                 btn.setEnabled(true);
             } else {
                 btn.setText("—");
@@ -71,8 +71,8 @@ public class FaceUpPanel extends JPanel implements GameObserver {
         }
     }
 
-    private Color textColorFor(TrainCarCard.CardColor color) {
-        return (color == TrainCarCard.CardColor.WHITE || color == TrainCarCard.CardColor.YELLOW) ? Color.BLACK : Color.WHITE;
+    private Color textColorFor() {
+        return Color.BLACK;
     }
 
     @Override
