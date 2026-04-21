@@ -31,7 +31,7 @@ public class MainFrame extends JFrame {
                 if (response == JOptionPane.YES_OPTION) {
                     System.exit(0);
                 }else{
-                    e.getWindow().dispose();
+//                    e.getWindow().dispose();
                 }
             }
         });
