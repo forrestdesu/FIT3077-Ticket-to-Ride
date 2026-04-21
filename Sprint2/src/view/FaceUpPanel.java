@@ -45,7 +45,7 @@ public class FaceUpPanel extends JPanel implements GameObserver {
             JButton btn = faceUpCardsButton.get(i);
             if (i < faceUp.size()) {
                 TrainCarCard card = faceUp.get(i);
-                String label = card.getCardColor() == TrainCarCard.CardColor.LOCOMOTIVE ? "LOCO" : card.getCardColor().toString();
+                String label = card.getCardColor() == TrainCarCard.CardColor.LOCOMOTIVE ? "LOCOMOTIVE" : card.getCardColor().toString();
                 btn.setText("<html><center>" + label + "</center></html>");
                 Color bg = cardColorToAwt(card.getCardColor());
                 btn.setBackground(bg);

@@ -37,7 +37,7 @@ public class MainFrame extends JFrame {
         });
 
 //        setSize(getMaximumSize());
-        setMinimumSize(new Dimension(800,600));
+        setMinimumSize(new Dimension(1000,800));
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLayout(new GridBagLayout());
 

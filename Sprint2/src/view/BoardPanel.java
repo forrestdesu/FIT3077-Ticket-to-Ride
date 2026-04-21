@@ -22,7 +22,7 @@ public class BoardPanel extends JPanel implements GameObserver {
         this.gameEngine = gameEngine;
         gameEngine.addObserver(this);
         setBorder(BorderFactory.createTitledBorder("Board"));
-        setBackground(Color.WHITE);
+        setBackground(Color.LIGHT_GRAY);
 
         addComponentListener(new ComponentAdapter() {
             @Override
@@ -54,7 +54,7 @@ public class BoardPanel extends JPanel implements GameObserver {
 
     private int drawH(){
         Insets insets = getInsets();
-        return getWidth() - insets.top - insets.bottom - 20;
+        return getHeight() - insets.top - insets.bottom - 20;
     }
 
     private int toPixelX(City city){
@@ -183,8 +183,8 @@ public class BoardPanel extends JPanel implements GameObserver {
     }
 
     private void drawCity(Graphics2D g2, City city) {
-        int cx = city.getPixelX(getWidth());
-        int cy = city.getPixelY(getHeight());
+        int cx = toPixelX(city);
+        int cy = toPixelY(city);
 
         g2.setColor(new Color(60, 30, 20));
         g2.fillOval(cx - CITY_RADIUS, cy - CITY_RADIUS, CITY_RADIUS * 2, CITY_RADIUS * 2);
