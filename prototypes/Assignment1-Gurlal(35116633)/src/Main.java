@@ -14,7 +14,7 @@ public class Main {
         JFrame frame = createFrame("Main Menu");
 
         JButton playButton = new JButton("Play");
-        playButton.setFont(new Font("Arial", Font.BOLD, 20));
+        // playButton.setFont(new Font("Arial", Font.BOLD, 20));
 
         playButton.addActionListener(e -> {
             frame.dispose();
