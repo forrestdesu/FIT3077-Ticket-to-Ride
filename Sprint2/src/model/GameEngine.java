@@ -110,7 +110,7 @@ public class GameEngine {
 
     public void notifyObservers(){
         for(GameObserver observer : observers){
-            observer.onGameStateChange();
+            observer.onGameStateChanged();
         }
     }
 

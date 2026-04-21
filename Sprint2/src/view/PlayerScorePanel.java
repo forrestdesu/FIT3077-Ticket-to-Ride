@@ -58,7 +58,7 @@ public class PlayerScorePanel extends JPanel implements GameObserver {
     }
 
     @Override
-    public void onGameStateChange() {
+    public void onGameStateChanged() {
         refresh();
     }
 }

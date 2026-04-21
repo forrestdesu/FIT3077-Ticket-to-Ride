@@ -229,7 +229,7 @@ public class BoardPanel extends JPanel implements GameObserver {
     }
 
     @Override
-    public void onGameStateChange() {
+    public void onGameStateChanged() {
         repaint();
     }
 }
