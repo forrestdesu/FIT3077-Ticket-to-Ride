@@ -1,5 +1,6 @@
 package src.view;
 
+import src.controller.GameController;
 import src.model.GameEngine;
 
 import javax.swing.*;
@@ -24,20 +25,24 @@ public class MainFrame extends JFrame {
 
         gameEngine = new GameEngine(playerNames);
 
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e){
-                int response = JOptionPane.showConfirmDialog(null, "Are you sure to exit the game?", "Confirm Game Exit", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE);
-                if (response == JOptionPane.YES_OPTION) {
-                    System.exit(0);
-                }else{
-//                    e.getWindow().dispose();
-                }
-            }
-        });
+        addWindowListener(
+                new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent e) {
+                        int response =
+                                JOptionPane.showConfirmDialog(
+                                        null,
+                                        "Are you sure to exit the game?",
+                                        "Confirm Game Exit",
+                                        JOptionPane.YES_OPTION,
+                                        JOptionPane.QUESTION_MESSAGE);
+                        if (response == JOptionPane.YES_OPTION) {
+                            System.exit(0);
+                        }
+                    }
+                });
 
-//        setSize(getMaximumSize());
-        setMinimumSize(new Dimension(1000,800));
+        setMinimumSize(new Dimension(1000, 800));
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLayout(new GridBagLayout());
 
@@ -87,25 +92,47 @@ public class MainFrame extends JFrame {
         add(faceUpPanel, gbc);
 
         setLocationRelativeTo(null);
+
+        // Wire all button listeners through the controller layer
+        new GameController(this, gameEngine);
+
         setVisible(true);
     }
 
-    public BoardPanel getBoardPanel(){
+    /** Returns the board panel for route selection. */
+    public BoardPanel getBoardPanel() {
         return boardPanel;
     }
 
-    public JButton getDrawCardsButton(){
+    /** Returns the "Draw Cards" action button. */
+    public JButton getDrawCardsButton() {
         return actionsPanel.getDrawCardsButton();
     }
 
+    /** Returns the "Draw Tickets" action button. */
     public JButton getDrawTicketsButton() {
         return actionsPanel.getDrawTicketsButton();
     }
 
+    /** Returns the "Claim Route" action button. */
+    public JButton getClaimRouteButton() {
+        return actionsPanel.getClaimRouteButton();
+    }
+
+    /** Returns one of the 5 face-up card buttons by index (0–4). */
     public JButton getFaceUpButton(int index) {
         return faceUpPanel.getCardButton(index);
     }
 
+    /**
+     * Returns the blind draw deck button so controllers can attach listeners.
+     * Previously only accessible inside DeckPanel.
+     */
+    public JButton getTrainCarDeckButton() {
+        return deckPanel.getTrainCarDeckButton();
+    }
+
+    /** Returns the game engine. */
     public GameEngine getEngine() {
         return gameEngine;
     }
