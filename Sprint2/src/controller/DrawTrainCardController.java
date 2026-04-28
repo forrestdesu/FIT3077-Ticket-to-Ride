@@ -25,6 +25,10 @@ import java.util.List;
  *   <li>A face-up Locomotive cannot be taken as the 2nd card.</li>
  *   <li>A Locomotive drawn blindly still counts as 1 of the 2 draws.</li>
  * </ul>
+ *
+ * <p>This controller does NOT advance the turn itself. After the draw phase
+ * completes it calls {@link TurnController#onActionCompleted()} so the player
+ * can manually end their turn via the End Turn button.
  */
 public class DrawTrainCardController {
 
@@ -32,6 +36,7 @@ public class DrawTrainCardController {
 
     private final MainFrame mainFrame;
     private final GameEngine gameEngine;
+    private final TurnController turnController;
 
     /** Tracks how many cards the current player has drawn this turn (0, 1, or 2). */
     private int drawsUsedThisTurn;
@@ -42,12 +47,15 @@ public class DrawTrainCardController {
     /**
      * Constructs the controller and wires all button listeners.
      *
-     * @param mainFrame  the main game window
-     * @param gameEngine the central game state
+     * @param mainFrame      the main game window
+     * @param gameEngine     the central game state
+     * @param turnController the turn controller to notify when the action is complete
      */
-    public DrawTrainCardController(MainFrame mainFrame, GameEngine gameEngine) {
+    public DrawTrainCardController(MainFrame mainFrame, GameEngine gameEngine,
+                                   TurnController turnController) {
         this.mainFrame = mainFrame;
         this.gameEngine = gameEngine;
+        this.turnController = turnController;
         this.drawsUsedThisTurn = 0;
         this.drawModeActive = false;
 
@@ -56,16 +64,13 @@ public class DrawTrainCardController {
 
     /** Attaches action listeners to the Draw Cards button, all 5 face-up slots, and the blind deck. */
     private void wireListeners() {
-        // "Draw Cards" action button — enters draw mode
         mainFrame.getDrawCardsButton().addActionListener(e -> handleEnterDrawMode());
 
-        // Each of the 5 face-up card buttons
         for (int i = 0; i < GameEngine.FACE_UP_CARD_COUNT; i++) {
             final int index = i;
             mainFrame.getFaceUpButton(index).addActionListener(e -> handleFaceUpCardClick(index));
         }
 
-        // Blind draw from the top of the deck
         mainFrame.getTrainCarDeckButton().addActionListener(e -> handleBlindDraw());
     }
 
@@ -75,13 +80,12 @@ public class DrawTrainCardController {
      */
     private void handleEnterDrawMode() {
         if (drawModeActive) {
-            return; // already in draw mode, ignore double-click
+            return;
         }
 
         CardDeck deck = gameEngine.getCardDeck();
         List<TrainCarCard> faceUp = gameEngine.getFaceUpCards();
 
-        // Edge case: no cards available anywhere
         if (deck.isCardDeckEmpty() && faceUp.isEmpty()) {
             JOptionPane.showMessageDialog(
                     mainFrame,
@@ -93,7 +97,6 @@ public class DrawTrainCardController {
 
         drawModeActive = true;
         drawsUsedThisTurn = 0;
-        // Visual feedback: update title so player knows draw mode is active
         mainFrame.setTitle("London Map - Draw a card (click a face-up card or the deck)");
     }
 
@@ -104,13 +107,13 @@ public class DrawTrainCardController {
      */
     private void handleFaceUpCardClick(int index) {
         if (!drawModeActive) {
-            return; // ignore clicks outside of draw mode
+            return;
         }
 
         List<TrainCarCard> faceUp = gameEngine.getFaceUpCards();
 
         if (index >= faceUp.size()) {
-            return; // slot is empty, ignore
+            return;
         }
 
         TrainCarCard selectedCard = faceUp.get(index);
@@ -123,22 +126,20 @@ public class DrawTrainCardController {
             return;
         }
 
-        // Remove from face-up and add to player hand
         faceUp.remove(index);
         Player currentPlayer = gameEngine.getCurrentPlayer();
         currentPlayer.getPlayerhand().addCard(selectedCard);
 
-        // Refill the face-up row from the deck
         gameEngine.refillFaceUpCards();
         drawsUsedThisTurn++;
 
-        // A face-up Locomotive costs the full draw phase
         boolean isLocomotive = selectedCard.isLocomotive();
         if (isLocomotive || drawsUsedThisTurn >= MAX_DRAWS_PER_TURN) {
             endDrawPhase();
         } else {
-            // Notify observers to refresh UI (hand, face-up cards) mid-draw
+            // Mid-draw: refresh UI but stay in draw mode for second card
             gameEngine.notifyObservers();
+            mainFrame.setTitle("London Map - Draw your second card");
         }
     }
 
@@ -164,7 +165,7 @@ public class DrawTrainCardController {
 
         TrainCarCard drawnCard = deck.drawCard();
         if (drawnCard == null) {
-            return; // defensive check
+            return;
         }
 
         Player currentPlayer = gameEngine.getCurrentPlayer();
@@ -174,8 +175,8 @@ public class DrawTrainCardController {
         if (drawsUsedThisTurn >= MAX_DRAWS_PER_TURN) {
             endDrawPhase();
         } else {
-            // Notify observers to refresh hand count mid-draw
             gameEngine.notifyObservers();
+            mainFrame.setTitle("London Map - Draw your second card");
         }
     }
 
@@ -194,13 +195,13 @@ public class DrawTrainCardController {
     }
 
     /**
-     * Ends the draw phase: resets state, advances the turn, and notifies the UI.
-     * Called after the player has used both draws, or drew a face-up Locomotive.
+     * Ends the draw phase and signals TurnController that the action is complete.
+     * Does NOT advance the turn — the player must press End Turn.
      */
     private void endDrawPhase() {
         drawModeActive = false;
         drawsUsedThisTurn = 0;
-        mainFrame.setTitle("London Map - Game On");
-        gameEngine.nextPlayerTurn();
+        gameEngine.notifyObservers();
+        turnController.onActionCompleted();
     }
 }

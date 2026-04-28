@@ -18,23 +18,26 @@ import java.util.List;
  * <p>Two-step flow:
  * <ol>
  *   <li>Player clicks "Draw Tickets" in the Actions panel to enter draw mode.</li>
- *   <li>Player clicks the Destination Ticket deck button to draw tickets and
- *       open the selection dialog.</li>
+ *   <li>Player clicks the Destination Ticket deck button to draw and open the dialog.</li>
  * </ol>
  *
  * <p>In the dialog:
  * <ul>
  *   <li>Each drawn ticket is shown as a pre-checked checkbox.</li>
- *   <li>Player unchecks any tickets they do not want to keep.</li>
- *   <li>At least 1 ticket must be kept before Confirm is accepted.</li>
- *   <li>Closing with the X button cancels the action — all drawn tickets
- *       are returned to the bottom of the deck and the turn does not advance.</li>
+ *   <li>Player must keep at least 1 ticket before Confirm is accepted.</li>
+ *   <li>Closing with X or Cancel returns all tickets to the bottom of the
+ *       deck and does not end the turn.</li>
  * </ul>
+ *
+ * <p>This controller does NOT advance the turn itself. After confirming a valid
+ * selection it calls {@link TurnController#onActionCompleted()} so the player
+ * can manually end their turn via the End Turn button.
  */
 public class DrawTicketController {
 
     private final MainFrame mainFrame;
     private final GameEngine gameEngine;
+    private final TurnController turnController;
 
     /** Whether the player has clicked "Draw Tickets" and is waiting to click the deck. */
     private boolean drawModeActive;
@@ -42,35 +45,32 @@ public class DrawTicketController {
     /**
      * Constructs the controller and wires all button listeners.
      *
-     * @param mainFrame  the main game window
-     * @param gameEngine the central game state
+     * @param mainFrame      the main game window
+     * @param gameEngine     the central game state
+     * @param turnController the turn controller to notify when the action is complete
      */
-    public DrawTicketController(MainFrame mainFrame, GameEngine gameEngine) {
+    public DrawTicketController(MainFrame mainFrame, GameEngine gameEngine,
+                                TurnController turnController) {
         this.mainFrame = mainFrame;
         this.gameEngine = gameEngine;
+        this.turnController = turnController;
         this.drawModeActive = false;
         wireListeners();
     }
 
-    /**
-     * Attaches listeners to the "Draw Tickets" action button and the
-     * destination deck button in DeckPanel.
-     */
+    /** Attaches listeners to the "Draw Tickets" action button and the destination deck button. */
     private void wireListeners() {
-        // Step 1: enter draw mode
         mainFrame.getDrawTicketsButton().addActionListener(e -> handleEnterDrawMode());
-
-        // Step 2: click the destination deck to draw and open dialog
         mainFrame.getDestinationDeckButton().addActionListener(e -> handleDeckClick());
     }
 
     /**
      * Called when the player clicks "Draw Tickets" in the Actions panel.
-     * Validates that tickets are available and activates draw mode.
+     * Validates tickets are available and activates draw mode.
      */
     private void handleEnterDrawMode() {
         if (drawModeActive) {
-            return; // already in draw mode, ignore double-click
+            return;
         }
 
         if (gameEngine.getTicketDeck().isTicketsDeckEmpty()) {
@@ -88,21 +88,19 @@ public class DrawTicketController {
 
     /**
      * Called when the player clicks the destination deck button.
-     * Only acts if draw mode is active. Draws tickets, shows the selection
-     * dialog, and processes the player's choices.
+     * Only acts if draw mode is active.
      */
     private void handleDeckClick() {
         if (!drawModeActive) {
-            return; // ignore clicks outside of draw mode
+            return;
         }
 
         Player currentPlayer = gameEngine.getCurrentPlayer();
         List<DestinationTicket> drawnTickets = gameEngine.getTicketDeck().drawThreeTickets();
 
-        // Show the selection dialog
         List<DestinationTicket> keptTickets = showTicketSelectionDialog(currentPlayer, drawnTickets);
 
-        // null means the player closed the dialog with X — cancel the action
+        // null means player cancelled — return all tickets, do not complete the action
         if (keptTickets == null) {
             gameEngine.getTicketDeck().returnToBottom(drawnTickets);
             drawModeActive = false;
@@ -110,7 +108,6 @@ public class DrawTicketController {
             return;
         }
 
-        // Return unchosen tickets to the bottom of the deck
         List<DestinationTicket> returnedTickets = new ArrayList<>(drawnTickets);
         returnedTickets.removeAll(keptTickets);
 
@@ -122,26 +119,19 @@ public class DrawTicketController {
             gameEngine.getTicketDeck().returnToBottom(returnedTickets);
         }
 
-        endDrawPhase();
-    }
-
-    /**
-     * Resets draw mode state, restores the title, and advances the turn.
-     */
-    private void endDrawPhase() {
         drawModeActive = false;
         mainFrame.setTitle("London Map - Game On");
-        gameEngine.nextPlayerTurn();
+        gameEngine.notifyObservers();
+        turnController.onActionCompleted();
     }
 
     /**
      * Shows a modal dialog presenting the drawn tickets as checkboxes.
-     * The player must keep at least 1. Closing with X returns null so the
-     * caller can cancel the action and return all tickets to the deck.
+     * Returns the kept tickets on confirm, or null if the player cancels.
      *
-     * @param player       the current player (used for the dialog header)
+     * @param player       the current player
      * @param drawnTickets the tickets drawn from the deck
-     * @return the list of tickets the player chose to keep, or null if cancelled
+     * @return kept tickets, or null if cancelled
      */
     private List<DestinationTicket> showTicketSelectionDialog(
             Player player, List<DestinationTicket> drawnTickets) {
@@ -150,7 +140,6 @@ public class DrawTicketController {
         dialog.setLayout(new BorderLayout(10, 10));
         dialog.setResizable(false);
 
-        // Header
         JLabel header = new JLabel(
                 "<html><b>" + player.getPlayerName() + "</b> — choose which tickets to keep"
                         + " (you must keep at least 1):</html>",
@@ -158,7 +147,6 @@ public class DrawTicketController {
         header.setBorder(BorderFactory.createEmptyBorder(12, 16, 4, 16));
         dialog.add(header, BorderLayout.NORTH);
 
-        // One checkbox per drawn ticket, all pre-checked
         JPanel checkboxPanel = new JPanel(new GridLayout(drawnTickets.size(), 1, 6, 6));
         checkboxPanel.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
 
@@ -173,7 +161,6 @@ public class DrawTicketController {
         }
         dialog.add(checkboxPanel, BorderLayout.CENTER);
 
-        // Confirm and Cancel buttons
         JButton confirmButton = new JButton("Confirm");
         JButton cancelButton = new JButton("Cancel (return all)");
         confirmButton.setFont(new Font("Arial", Font.BOLD, 13));
@@ -185,7 +172,6 @@ public class DrawTicketController {
         buttonPanel.add(cancelButton);
         dialog.add(buttonPanel, BorderLayout.SOUTH);
 
-        // result[0] stays null if cancelled; set to kept list on confirm
         final List<DestinationTicket>[] result = new List[]{null};
 
         confirmButton.addActionListener(e -> {
@@ -207,13 +193,12 @@ public class DrawTicketController {
             dialog.dispose();
         });
 
-        // Cancel button and X button both close with result staying null
+        // Both Cancel button and X close with result staying null
         cancelButton.addActionListener(e -> dialog.dispose());
-
         dialog.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                dialog.dispose(); // result[0] remains null → caller cancels the action
+                dialog.dispose();
             }
         });
 
@@ -221,7 +206,7 @@ public class DrawTicketController {
         dialog.pack();
         dialog.setMinimumSize(new Dimension(400, 200));
         dialog.setLocationRelativeTo(mainFrame);
-        dialog.setVisible(true); // blocks until disposed
+        dialog.setVisible(true);
 
         return result[0];
     }
