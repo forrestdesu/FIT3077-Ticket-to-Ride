@@ -132,6 +132,14 @@ public class MainFrame extends JFrame {
         return deckPanel.getTrainCarDeckButton();
     }
 
+    /**
+     * Returns the destination ticket deck button so DrawTicketController
+     * can attach a listener to it.
+     */
+    public JButton getDestinationDeckButton() {
+        return deckPanel.getDestinationDeckButton();
+    }
+
     /** Returns the game engine. */
     public GameEngine getEngine() {
         return gameEngine;
