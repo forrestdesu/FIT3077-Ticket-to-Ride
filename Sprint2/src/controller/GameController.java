@@ -6,11 +6,12 @@ import src.view.MainFrame;
 /**
  * Top-level controller that instantiates and wires all action sub-controllers.
  *
- * <p>MainFrame creates this once after building all UI panels. Each sub-controller
- * attaches its own listeners to the relevant buttons.
+ * <p>TurnController is created first as it is passed into each action controller
+ * so they can notify it when their action completes, enabling the End Turn button.
  */
 public class GameController {
 
+    private final TurnController turnController;
     private final DrawTrainCardController drawTrainCardController;
     private final DrawTicketController drawTicketController;
 
@@ -21,8 +22,9 @@ public class GameController {
      * @param gameEngine the central game state
      */
     public GameController(MainFrame mainFrame, GameEngine gameEngine) {
-        drawTrainCardController = new DrawTrainCardController(mainFrame, gameEngine);
-        drawTicketController = new DrawTicketController(mainFrame, gameEngine);
+        turnController = new TurnController(mainFrame, gameEngine);
+        drawTrainCardController = new DrawTrainCardController(mainFrame, gameEngine, turnController);
+        drawTicketController = new DrawTicketController(mainFrame, gameEngine, turnController);
         // ClaimRouteController will be added in a subsequent commit
     }
 }
