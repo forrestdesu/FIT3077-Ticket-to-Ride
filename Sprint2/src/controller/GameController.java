@@ -12,6 +12,7 @@ import src.view.MainFrame;
 public class GameController {
 
     private final DrawTrainCardController drawTrainCardController;
+    private final DrawTicketController drawTicketController;
 
     /**
      * Constructs the GameController and wires all sub-controllers.
@@ -21,6 +22,7 @@ public class GameController {
      */
     public GameController(MainFrame mainFrame, GameEngine gameEngine) {
         drawTrainCardController = new DrawTrainCardController(mainFrame, gameEngine);
-        // DrawTicketController and ClaimRouteController will be added in subsequent commits
+        drawTicketController = new DrawTicketController(mainFrame, gameEngine);
+        // ClaimRouteController will be added in a subsequent commit
     }
 }
