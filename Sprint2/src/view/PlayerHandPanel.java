@@ -12,8 +12,15 @@ import java.util.List;
 
 public class PlayerHandPanel extends JPanel implements GameObserver {
     private final GameEngine gameEngine;
-    private static final int CARD_WIDTH = 70;
-    private static final int CARD_HEIGHT = 40;
+    private static final int CARD_WIDTH = 80;
+    private static final int CARD_HEIGHT = 44;
+
+    private static final int GRID_ROWS = 3;
+    private static final int GRID_COLS = 3;
+    private static final int GAP = 4;
+
+    private static final int TICKET_ROW_HEIGHT = 36;
+    private static final int TICKET_ROW_SCROLL_COUNT = 4;
 
     public PlayerHandPanel(GameEngine gameEngine) {
         this.gameEngine = gameEngine;
@@ -39,16 +46,21 @@ public class PlayerHandPanel extends JPanel implements GameObserver {
         header.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
         add(header, BorderLayout.NORTH);
 
-        JPanel cardGrid = new JPanel(new GridLayout(3, 3, 6, 6));
-        cardGrid.setBackground(new Color(248, 246, 238));
-        cardGrid.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
+        JPanel trainCardGridPanel = new JPanel(new GridLayout(GRID_ROWS, GRID_COLS, GAP, GAP));
+        trainCardGridPanel.setBackground(new Color(248, 246, 238));
+        trainCardGridPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+
+        int gridPrefW = GRID_COLS * CARD_WIDTH + (GRID_COLS - 1) * GAP + 8;
+        int gridPrefH = GRID_ROWS * CARD_HEIGHT + (GRID_ROWS - 1) * GAP + 8;
+        trainCardGridPanel.setPreferredSize(new Dimension(gridPrefW, gridPrefH));
+        trainCardGridPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, gridPrefH));
 
         for (TrainCarCard.CardColor color : TrainCarCard.CardColor.values()) {
             int count = player.getPlayerhand().cardColorCount(color);
-            cardGrid.add(makeCardTile(color, count));
+            trainCardGridPanel.add(makeCardTile(color, count));
         }
 
-        add(cardGrid, BorderLayout.CENTER);
+        add(trainCardGridPanel, BorderLayout.CENTER);
 
         List<DestinationTicket> tickets = player.getPlayerTickets();
         JPanel ticketPanel = buildTicketPanel(tickets);
@@ -94,13 +106,16 @@ public class PlayerHandPanel extends JPanel implements GameObserver {
         outer.setBackground(new Color(248, 246, 238));
         outer.setBorder(BorderFactory.createTitledBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(180, 170, 140)), "Destination Tickets"));
 
-        JPanel list = new JPanel(new GridLayout(0, 1, 2, 2));
+        JPanel list = new JPanel();
+        list.setLayout(new BoxLayout(list, BoxLayout.Y_AXIS));
         list.setBackground(new Color(248, 246, 238));
 
         if (tickets.isEmpty()) {
             JLabel none = new JLabel("  (none yet)", JLabel.LEFT);
             none.setFont(new Font("Arial", Font.ITALIC, 11));
             none.setForeground(Color.GRAY);
+            none.setMaximumSize(new Dimension(Integer.MAX_VALUE, TICKET_ROW_HEIGHT));
+            none.setPreferredSize(new Dimension(200, TICKET_ROW_HEIGHT));
             list.add(none);
         } else {
             for (DestinationTicket ticket : tickets) {
@@ -108,14 +123,21 @@ public class PlayerHandPanel extends JPanel implements GameObserver {
                 lbl.setFont(new Font("Arial", Font.PLAIN, 14));
                 lbl.setOpaque(true);
                 lbl.setBackground(new Color(255, 252, 230));
+                lbl.setPreferredSize(new Dimension(200, TICKET_ROW_HEIGHT));
+                lbl.setMaximumSize(new Dimension(Integer.MAX_VALUE, TICKET_ROW_HEIGHT));
+                lbl.setMinimumSize(new Dimension(50, TICKET_ROW_HEIGHT));
                 lbl.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(new Color(200, 185, 120), 1), BorderFactory.createEmptyBorder(8, 10, 8, 10)));
                 list.add(lbl);
+                list.add(Box.createVerticalStrut(2));
             }
         }
 
-        JScrollPane scroll = new JScrollPane(list);
+        int viewportH = TICKET_ROW_SCROLL_COUNT * (TICKET_ROW_HEIGHT + 2);
+
+        JScrollPane scroll = new JScrollPane(list, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.setBorder(BorderFactory.createEmptyBorder());
         scroll.setBackground(new Color(248, 246, 238));
+        scroll.setPreferredSize(new Dimension(200, viewportH));
         outer.add(scroll, BorderLayout.CENTER);
         return outer;
     }

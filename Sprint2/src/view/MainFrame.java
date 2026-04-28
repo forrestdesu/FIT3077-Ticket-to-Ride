@@ -19,6 +19,8 @@ public class MainFrame extends JFrame {
 
     private final GameEngine gameEngine;
 
+    private static final int RIGHT_PANEL_WIDTH = 400;
+
     public MainFrame(List<String> playerNames) {
         setTitle("London Map - Game On");
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -64,32 +66,37 @@ public class MainFrame extends JFrame {
         gbc.weighty = 0.9;
         add(boardPanel, gbc);
 
-        gbc.gridx = 1;
-        gbc.gridy = 0;
+        gbc.gridwidth = 1;
         gbc.gridheight = 1;
         gbc.weightx = 0.1;
-        gbc.weighty = 0.4;
-        add(playerHandPanel, gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.weighty = 0.05;
+        add(playerScorePanel, gbc);
 
         gbc.gridx = 1;
         gbc.gridy = 1;
-        gbc.weighty = 0.05;
-        add(playerScorePanel, gbc);
+        gbc.weighty = 0.55;
+        add(playerHandPanel, gbc);
 
         gbc.gridx = 1;
         gbc.gridy = 2;
         gbc.weighty = 0.15;
         add(actionsPanel, gbc);
 
-        gbc.gridx = 1;
-        gbc.gridy = 3;
-        gbc.gridheight = 1;
-        gbc.weighty = 0.2;
-        add(deckPanel, gbc);
-
         gbc.gridx = 0;
         gbc.gridy = 3;
+        gbc.gridheight = 1;
+        gbc.weightx = 0.9;
+        gbc.weighty = 0.2;
         add(faceUpPanel, gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.weightx = 0.1;
+        gbc.weighty = 0.2;
+        add(deckPanel, gbc);
 
         setLocationRelativeTo(null);
 
@@ -117,6 +124,10 @@ public class MainFrame extends JFrame {
     /** Returns the "Claim Route" action button. */
     public JButton getClaimRouteButton() {
         return actionsPanel.getClaimRouteButton();
+    }
+
+    public JButton getEndTurnButton() {
+        return actionsPanel.getEndTurnButton();
     }
 
     /** Returns one of the 5 face-up card buttons by index (0–4). */
