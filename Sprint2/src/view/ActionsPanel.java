@@ -10,7 +10,7 @@ public class ActionsPanel extends JPanel {
     private final JButton endTurnButton;
 
     public ActionsPanel() {
-        setLayout(new GridLayout(1, 3, 5, 5));
+        setLayout(new GridLayout(2, 2, 5, 5));
         setBorder(BorderFactory.createTitledBorder("Actions"));
         claimRouteButton = new JButton("Claim Route");
         drawCardsButton = new JButton("Draw Cards");

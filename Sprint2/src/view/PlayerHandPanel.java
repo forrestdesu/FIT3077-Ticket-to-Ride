@@ -50,11 +50,6 @@ public class PlayerHandPanel extends JPanel implements GameObserver {
         trainCardGridPanel.setBackground(new Color(248, 246, 238));
         trainCardGridPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
-        int gridPrefW = GRID_COLS * CARD_WIDTH + (GRID_COLS - 1) * GAP + 8;
-        int gridPrefH = GRID_ROWS * CARD_HEIGHT + (GRID_ROWS - 1) * GAP + 8;
-        trainCardGridPanel.setPreferredSize(new Dimension(gridPrefW, gridPrefH));
-        trainCardGridPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, gridPrefH));
-
         for (TrainCarCard.CardColor color : TrainCarCard.CardColor.values()) {
             int count = player.getPlayerhand().cardColorCount(color);
             trainCardGridPanel.add(makeCardTile(color, count));
