@@ -86,6 +86,25 @@ public class BoardPanel extends JPanel implements GameObserver {
         int y1 = toPixelY(route.getCity1());
         int x2 = toPixelX(route.getCity2());
         int y2 = toPixelY(route.getCity2());
+
+        if(route instanceof DoubleRoute){
+            double dx = x2 - x1;
+            double dy = y2 - y1;
+            double len = Math.hypot(dx, dy);
+
+            if (len > 0) {
+                double perpX = (-dy / len) * DOUBLE_ROUTE_OFFSET;
+                double perpY = (dx / len) * DOUBLE_ROUTE_OFFSET;
+                if (route.getId().endsWith("b")) {
+                    perpX = -perpX;
+                    perpY = -perpY;
+                }
+                x1 += perpX;
+                y1 += perpY;
+                x2 += perpX;
+                y2 += perpY;
+            }
+        }
         int midX = (x1 + x2) / 2;
         int midY = (y1 + y2) / 2;
         return Math.hypot(mouseX - midX, mouseY - midY);
@@ -152,10 +171,10 @@ public class BoardPanel extends JPanel implements GameObserver {
         float lineWidth;
         if (route.isRouteClaimed()) {
             lineColor = route.getClaimedBy().getPlayerColor();
-            lineWidth = 6f;
+            lineWidth = 7f;
         } else {
             lineColor = routeColorToAwt(route.getRouteColor());
-            lineWidth = 3.5f;
+            lineWidth = 4f;
         }
 
         g2.setColor(lineColor);
@@ -173,7 +192,36 @@ public class BoardPanel extends JPanel implements GameObserver {
             g2.fillRoundRect(midX - lw / 2 - 2, midY - fm.getAscent() - 1, lw + 4, fm.getAscent() + fm.getDescent() + 1, 3, 3);
             g2.setColor(new Color(40, 40, 40));
             g2.drawString(lenStr, midX - lw / 2, midY);
+        }else{
+            drawClaimedRoutePlayer(g2, ix1, iy1, ix2, iy2, route.getClaimedBy().getPlayerName());
         }
+    }
+
+    private void drawClaimedRoutePlayer(Graphics2D g2, int x1, int y1, int x2, int y2, String playerName) {
+        int midX = (x1 + x2) / 2;
+        int midY = (y1 + y2) / 2;
+
+        g2.setFont(new Font("Arial", Font.BOLD, 9));
+        FontMetrics fm = g2.getFontMetrics();
+        int textW = fm.stringWidth(playerName);
+        int textH = fm.getAscent() + fm.getDescent();
+
+        int padX = 4;
+        int padY = 2;
+        int pillX = midX - textW / 2 - padX;
+        int pillY = midY - fm.getAscent() - padY;
+        int pillW = textW + padX * 2;
+        int pillH = textH + padY * 2;
+
+        g2.setColor(new Color(255, 255, 255, 200));
+        g2.fillRoundRect(pillX, pillY, pillW, pillH, 6, 6);
+
+        g2.setColor(new Color(80, 80, 80, 180));
+        g2.setStroke(new BasicStroke(0.8f));
+        g2.drawRoundRect(pillX, pillY, pillW, pillH, 6, 6);
+
+        g2.setColor(new Color(20, 20, 20));
+        g2.drawString(playerName, midX - textW / 2, midY + fm.getDescent() - 1);
     }
 
     private void drawCities(Graphics2D g2, BoardMap board) {

@@ -1,5 +1,7 @@
 package src.model;
 
+import java.awt.*;
+
 public class Route {
     public enum RouteColor{
         RED, BLUE, GREEN, YELLOW, BLACK, WHITE, ORANGE, PINK, GREY
@@ -18,7 +20,10 @@ public class Route {
         this.city2 = city2;
         this.routeLength = routeLength;
         this.routeColor = routeColor;
-        this.claimedBy = null;
+//        if(this.routeLength == 5) {
+//            this.claimedBy = new Player("Player New", Color.BLACK);
+            this.claimedBy = null;
+//        }
     }
 
     public String getId(){
