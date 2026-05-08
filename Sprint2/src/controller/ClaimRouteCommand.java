@@ -5,6 +5,10 @@ import src.model.Player;
 import src.model.Route;
 import src.model.TrainCarCard;
 
+import src.exception.RouteAlreadyClaimed;
+import src.exception.InsufficientTrainCar;
+import src.model.DoubleRoute;
+
 /**
  * design patern: Command Pattern
  *
@@ -61,3 +65,48 @@ public class ClaimRouteCommand {
         return cardColorToUse;
     }
 }
+
+    /**
+     * validates whether this claim action is legal
+     *
+     * checks the rules from the rulebook:
+     * - route must not already be claimed by someone
+     * - in a 2-player game, if one side of a double route is claimed, the other side is blocked
+     * -  player must have enough train pieces
+     * - player must have enough matching cards
+     *
+     *  rule is broken - an exception is thrown with a message
+     * explaining what went wrong (show to the player as pop up)
+     *
+     * @throws RouteAlreadyClaimed  if the route or its parallel is taken
+     * @throws InsufficientTrainCar if the player lacks pieces or cards
+     */
+    public void validate() throws RouteAlreadyClaimed, InsufficientTrainCar {
+
+        // check: is the route already claimed?
+        // every route can only be claimed once.
+        // of someone already owns -no one else can take
+        if (route.isRouteClaimed()) {
+            throw new RouteAlreadyClaimed(
+                    "This route has already been claimed by " + route.getClaimedBy().getPlayerName() + ".");
+        }
+
+        // check no2: double route restriction for 2-player games
+        // some cities are connected by two parallel routes
+        // In a 2-player game,  rulebook says: if one side is claimed,
+        // other side is blocked — no one can use it.
+        // so have to check if this route is a doubel route, and if its parallel partner
+        // is already claimed.
+
+        if (route instanceof DoubleRoute) {
+            DoubleRoute doubleRoute = (DoubleRoute) route;
+            DoubleRoute parallel = doubleRoute.getParallelRoute();
+
+            if (parallel != null && parallel.isRouteClaimed()) {
+                throw new RouteAlreadyClaimed(
+                        "In a 2-player game, only one side of a double route can be used. "
+                                + "The parallel route is already claimed by "
+                                + parallel.getClaimedBy().getPlayerName() + ".");
+            }
+        }
+    }
