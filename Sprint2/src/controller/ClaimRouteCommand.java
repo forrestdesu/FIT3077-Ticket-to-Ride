@@ -93,8 +93,7 @@ public class ClaimRouteCommand {
 
         // check no2: double route restriction for 2-player games
         // some cities are connected by two parallel routes
-        // In a 2-player game,  rulebook says: if one side is claimed,
-        // other side is blocked — no one can use it.
+        // In a 2-player game, rulebook says: if one side is claimed, other side is blocked — no one can use it.
         // so have to check if this route is a doubel route, and if its parallel partner
         // is already claimed.
 
@@ -109,4 +108,38 @@ public class ClaimRouteCommand {
                                 + parallel.getClaimedBy().getPlayerName() + ".");
             }
         }
+
+        // check 3: does the player have enough train pieces ?
+        // each space on a route needs one physical train piece
+        // A route of length 4 needs 4 train pieces
+        // if the player has fewer pieces than the route length - they can't claim
+        if (player.getTrainPiecesRemaining() < route.getRouteLength()) {
+            throw new InsufficientTrainCar( "You only have " + player.getTrainPiecesRemaining()
+                            + " train pieces but this route requires "
+                            + route.getRouteLength() + ".");
+        }
+
+        // check 4: does the player have enough matching cards?
+        // to claim a route, need cards matching the route's colour
+        // locomotives (wild cards) can substitute for any colour
+        int colorCardCount = player.getPlayerhand().cardColorCount(cardColorToUse);
+        int locomotiveCount = player.getPlayerhand().locomotiveCount();
+
+        if (cardColorToUse == TrainCarCard.CardColor.LOCOMOTIVE) {
+            // if using only locomotives — just check locomotive count
+            if (locomotiveCount < route.getRouteLength()) {
+                throw new InsufficientTrainCar( "You don't have enough Locomotive cards. You need "
+                                + route.getRouteLength() + " but only have "
+                                + locomotiveCount + ".");
+            }
+        } else {
+            // using a colour + some locomotives to fill the gap
+            if (colorCardCount + locomotiveCount < route.getRouteLength()) {
+                throw new InsufficientTrainCar(
+                        "You don't have enough cards. You need " + route.getRouteLength() + " "
+                                + cardColorToUse.name() + " cards (locomotives can substitute). You have "
+                                + colorCardCount + " " + cardColorToUse.name() + " and " + locomotiveCount + " Locomotive(s).");
+            }
+        }
     }
+}
