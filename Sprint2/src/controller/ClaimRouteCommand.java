@@ -64,7 +64,7 @@ public class ClaimRouteCommand {
     public TrainCarCard.CardColor getCardColorToUse() {
         return cardColorToUse;
     }
-}
+
 
     /**
      * validates whether this claim action is legal
@@ -141,5 +141,65 @@ public class ClaimRouteCommand {
                                 + colorCardCount + " " + cardColorToUse.name() + " and " + locomotiveCount + " Locomotive(s).");
             }
         }
+    }
+    /**
+     * execute claim action — chaning game state
+     *
+     * 1. figure out how many colour cards vs locomotives to spend
+     * 2. remove those cards from the player's hand
+     * 3. put the removed cards into the discard pile
+     * 4. mark the route as claimed by this player
+     *    (this also deducts train pieces and adds score points)
+     *
+     * Imp note to self: call validate() before execute()
+     * execute() only if all checks have already passed
+     *
+     * "card deck" - needed to discard used cards
+     */
+    public void execute(CardDeck cardDeck) {
+        int routeLength = route.getRouteLength();
+        Hand hand = player.getPlayerhand();
+
+        // 1: calculate how many of each card type to spend
+        // use as many colour cards as possible first, then fill the remaining slots with locomotives (wild cards)
+        //
+        int colorAvailable = hand.cardColorCount(cardColorToUse);
+        int colorToSpend = Math.min(colorAvailable, routeLength);
+        int locosToSpend = routeLength - colorToSpend;
+
+        // if paying entirely with locomotives, different calculation
+        if (cardColorToUse == TrainCarCard.CardColor.LOCOMOTIVE) {
+            colorToSpend = routeLength;
+            locosToSpend = 0;
+        }
+
+        // 2: remove cards from the player's hand
+        // removeCardsFromHand returns the actual card objects that were removed
+        List<TrainCarCard> removedColorCards =
+                hand.removeCardsFromHand(cardColorToUse, colorToSpend);
+
+        List<TrainCarCard> removedLocoCards = new ArrayList<>();
+        if (locosToSpend > 0) {
+            removedLocoCards =
+                    hand.removeCardsFromHand(TrainCarCard.CardColor.LOCOMOTIVE, locosToSpend);
+        }
+
+        // 3:: discard the used cards
+        // used cards go to the discard pile, not back into the deck
+        // when the draw pile runs out, the discard pile gets reshuffled
+        for (TrainCarCard card : removedColorCards) {
+            cardDeck.discardCard(card);
+        }
+        for (TrainCarCard card : removedLocoCards) {
+            cardDeck.discardCard(card);
+        }
+
+        // 4: claim the route
+        // Player.claimRoute():
+        //   a) marks the route as owned by this player
+        //   b) add the route to the player's claimed routes list
+        //   c) deduct train pieces from the player's supply
+        //   d) adds score points based on route length
+        player.claimRoute(route);
     }
 }
