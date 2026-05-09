@@ -12,11 +12,12 @@ import javax.swing.*;
  * (draw train cards, draw destination tickets, or claim a route). A player
  * cannot end their turn without completing an action.
  *
- * <p>Other controllers call {@link #onActionCompleted()} when their action
- * finishes. This disables all three action buttons so no further actions
- * can be taken, and enables the End Turn button. Pressing End Turn shows a
- * confirmation dialog — if confirmed, the turn advances and action buttons
- * are re-enabled for the next player.
+ * <p>Action controllers call {@link #onActionStarted()} as soon as the player
+ * commits to an action (e.g. enters draw mode). This immediately locks all
+ * other action buttons so the player cannot switch actions mid-turn.
+ *
+ * <p>Action controllers call {@link #onActionCompleted()} when their action
+ * fully finishes. This enables the End Turn button.
  */
 public class TurnController {
 
@@ -37,26 +38,31 @@ public class TurnController {
         this.gameEngine = gameEngine;
         this.actionCompletedThisTurn = false;
 
-        // End Turn starts disabled — player must complete an action first
         mainFrame.getEndTurnButton().setEnabled(false);
-
         mainFrame.getEndTurnButton().addActionListener(e -> handleEndTurn());
     }
 
     /**
-     * Called by action controllers when the player has successfully completed
-     * their action for this turn. Disables all action buttons to prevent a
-     * second action being taken, and enables the End Turn button.
+     * Called by action controllers as soon as the player commits to an action
+     * (e.g. enters draw mode by clicking "Draw Cards" or "Draw Tickets",
+     * or clicks "Claim Route"). Immediately locks all other action buttons
+     * so the player cannot switch to a different action mid-turn.
      */
-    public void onActionCompleted() {
-        actionCompletedThisTurn = true;
-
-        // Lock all action buttons — only one action allowed per turn
+    public void onActionStarted() {
         mainFrame.getDrawCardsButton().setEnabled(false);
         mainFrame.getDrawTicketsButton().setEnabled(false);
         mainFrame.getClaimRouteButton().setEnabled(false);
+    }
 
-        // Allow the player to end their turn
+    /**
+     * Called by action controllers when the player has successfully completed
+     * their action for this turn. Enables the End Turn button.
+     */
+    public void onActionCompleted() {
+        actionCompletedThisTurn = true;
+        mainFrame.getDrawCardsButton().setEnabled(false);
+        mainFrame.getDrawTicketsButton().setEnabled(false);
+        mainFrame.getClaimRouteButton().setEnabled(false);
         mainFrame.getEndTurnButton().setEnabled(true);
         mainFrame.setTitle("London Map - Action done! Press End Turn when ready.");
     }
@@ -64,7 +70,6 @@ public class TurnController {
     /**
      * Called when the player clicks the End Turn button.
      * Shows a Yes/No confirmation dialog. If confirmed, the turn advances.
-     * If the player has not yet completed an action, shows a warning instead.
      */
     private void handleEndTurn() {
         if (!actionCompletedThisTurn) {
@@ -87,21 +92,16 @@ public class TurnController {
         if (response == JOptionPane.YES_OPTION) {
             endTurn();
         }
-        // NO_OPTION: do nothing, player stays in their turn
     }
 
     /**
-     * Advances the turn to the next player and resets all button states
-     * ready for the next player's turn.
+     * Advances the turn to the next player and resets all button states.
      */
-    private void endTurn() {
+    public void endTurn() {
         actionCompletedThisTurn = false;
-
-        // Re-enable action buttons for the next player
         mainFrame.getDrawCardsButton().setEnabled(true);
         mainFrame.getDrawTicketsButton().setEnabled(true);
         mainFrame.getClaimRouteButton().setEnabled(true);
-
         mainFrame.getEndTurnButton().setEnabled(false);
         mainFrame.setTitle("London Map - Game On");
         gameEngine.nextPlayerTurn();

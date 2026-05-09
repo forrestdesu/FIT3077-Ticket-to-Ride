@@ -13,22 +13,19 @@ import java.util.List;
 /**
  * Controller responsible for handling the "Draw Train Car Cards" action.
  *
- * <p>A player may draw up to 2 train car cards per turn by either:
- * <ul>
- *   <li>Clicking a face-up card to take it from the face-up row, or</li>
- *   <li>Clicking the blind deck button to draw the top card unseen.</li>
- * </ul>
+ * <p>Two-step flow:
+ * <ol>
+ *   <li>Player clicks "Draw Cards" to enter draw mode — all other action
+ *       buttons are immediately locked via {@link TurnController#onActionStarted()}.</li>
+ *   <li>Player clicks a face-up card or the blind deck to draw (up to 2 cards).</li>
+ * </ol>
  *
  * <p>Locomotive rules enforced:
  * <ul>
- *   <li>Taking a face-up Locomotive costs the entire draw phase (only 1 card drawn).</li>
+ *   <li>Taking a face-up Locomotive costs the entire draw phase (only 1 card).</li>
  *   <li>A face-up Locomotive cannot be taken as the 2nd card.</li>
- *   <li>A Locomotive drawn blindly still counts as 1 of the 2 draws.</li>
+ *   <li>A Locomotive drawn blindly still allows a second draw.</li>
  * </ul>
- *
- * <p>This controller does NOT advance the turn itself. After the draw phase
- * completes it calls {@link TurnController#onActionCompleted()} so the player
- * can manually end their turn via the End Turn button.
  */
 public class DrawTrainCardController {
 
@@ -38,10 +35,7 @@ public class DrawTrainCardController {
     private final GameEngine gameEngine;
     private final TurnController turnController;
 
-    /** Tracks how many cards the current player has drawn this turn (0, 1, or 2). */
     private int drawsUsedThisTurn;
-
-    /** Whether the player has clicked "Draw Cards" and is in an active drawing phase. */
     private boolean drawModeActive;
 
     /**
@@ -49,7 +43,7 @@ public class DrawTrainCardController {
      *
      * @param mainFrame      the main game window
      * @param gameEngine     the central game state
-     * @param turnController the turn controller to notify when the action is complete
+     * @param turnController the turn controller to notify on action start/complete
      */
     public DrawTrainCardController(MainFrame mainFrame, GameEngine gameEngine,
                                    TurnController turnController) {
@@ -58,11 +52,9 @@ public class DrawTrainCardController {
         this.turnController = turnController;
         this.drawsUsedThisTurn = 0;
         this.drawModeActive = false;
-
         wireListeners();
     }
 
-    /** Attaches action listeners to the Draw Cards button, all 5 face-up slots, and the blind deck. */
     private void wireListeners() {
         mainFrame.getDrawCardsButton().addActionListener(e -> handleEnterDrawMode());
 
@@ -76,7 +68,7 @@ public class DrawTrainCardController {
 
     /**
      * Called when the player clicks "Draw Cards".
-     * Validates that drawing is possible and activates draw mode.
+     * Locks all other action buttons immediately via onActionStarted().
      */
     private void handleEnterDrawMode() {
         if (drawModeActive) {
@@ -97,6 +89,9 @@ public class DrawTrainCardController {
 
         drawModeActive = true;
         drawsUsedThisTurn = 0;
+
+        // Lock all other action buttons immediately — player has committed to drawing cards
+        turnController.onActionStarted();
         mainFrame.setTitle("London Map - Draw a card (click a face-up card or the deck)");
     }
 
@@ -137,14 +132,13 @@ public class DrawTrainCardController {
         if (isLocomotive || drawsUsedThisTurn >= MAX_DRAWS_PER_TURN) {
             endDrawPhase();
         } else {
-            // Mid-draw: refresh UI but stay in draw mode for second card
             gameEngine.notifyObservers();
             mainFrame.setTitle("London Map - Draw your second card");
         }
     }
 
     /**
-     * Handles the player clicking the blind deck button to draw the top card unseen.
+     * Handles the player clicking the blind deck button.
      * A Locomotive drawn blindly still allows a second draw.
      */
     private void handleBlindDraw() {
@@ -181,7 +175,7 @@ public class DrawTrainCardController {
     }
 
     /**
-     * Validates whether a face-up card can legally be drawn given the current draw state.
+     * Validates whether a face-up card can legally be drawn.
      *
      * @param card the face-up card the player wants to take
      * @throws TrainCardDrawError if the draw is illegal
@@ -196,7 +190,6 @@ public class DrawTrainCardController {
 
     /**
      * Ends the draw phase and signals TurnController that the action is complete.
-     * Does NOT advance the turn — the player must press End Turn.
      */
     private void endDrawPhase() {
         drawModeActive = false;

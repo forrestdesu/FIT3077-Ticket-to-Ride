@@ -87,6 +87,8 @@ public class ClaimRouteController {
         }
 
         // COMMAND PATTERN: Execute the command
+        // Lock other action buttons now that claim is confirmed and validated
+        turnController.onActionStarted();
         command.execute(gameEngine.getCardDeck());
 
         // COMMAND PATTERN: Record in history
