@@ -1,14 +1,12 @@
 // src/controller/ClaimRouteCommand.java
 package src.controller;
 
-import src.model.Player;
-import src.model.Route;
-import src.model.TrainCarCard;
-
-import src.exception.RouteAlreadyClaimed;
 import src.exception.InsufficientTrainCar;
-import src.model.DoubleRoute;
+import src.exception.RouteAlreadyClaimed;
+import src.model.*;
 
+import java.util.ArrayList;
+import java.util.List;
 /**
  * design patern: Command Pattern
  *
