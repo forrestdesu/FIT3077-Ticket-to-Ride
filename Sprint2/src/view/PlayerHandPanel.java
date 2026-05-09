@@ -114,14 +114,31 @@ public class PlayerHandPanel extends JPanel implements GameObserver {
             list.add(none);
         } else {
             for (DestinationTicket ticket : tickets) {
-                JLabel lbl = new JLabel("  " + ticket.getCity1() + " ↔ " + ticket.getCity2() + "  [" + ticket.getPoints() + " pts]", JLabel.LEFT);
+                String statusIcon = ticket.isCompleted() ? " ✓" : "";
+                JLabel lbl = new JLabel(
+                        "  " + ticket.getCity1() + " ↔ " + ticket.getCity2()
+                                + "  [" + ticket.getPoints() + " pts]" + statusIcon,
+                        JLabel.LEFT);
                 lbl.setFont(new Font("Arial", Font.PLAIN, 14));
                 lbl.setOpaque(true);
-                lbl.setBackground(new Color(255, 252, 230));
+
+                if (ticket.isCompleted()) {
+                    lbl.setBackground(new Color(200, 235, 200));
+                    lbl.setForeground(new Color(30, 100, 30));
+                    lbl.setBorder(BorderFactory.createCompoundBorder(
+                            BorderFactory.createLineBorder(new Color(80, 160, 80), 1),
+                            BorderFactory.createEmptyBorder(8, 10, 8, 10)));
+                } else {
+                    lbl.setBackground(new Color(255, 252, 230));
+                    lbl.setForeground(Color.BLACK);
+                    lbl.setBorder(BorderFactory.createCompoundBorder(
+                            BorderFactory.createLineBorder(new Color(200, 185, 120), 1),
+                            BorderFactory.createEmptyBorder(8, 10, 8, 10)));
+                }
+
                 lbl.setPreferredSize(new Dimension(200, TICKET_ROW_HEIGHT));
                 lbl.setMaximumSize(new Dimension(Integer.MAX_VALUE, TICKET_ROW_HEIGHT));
                 lbl.setMinimumSize(new Dimension(50, TICKET_ROW_HEIGHT));
-                lbl.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(new Color(200, 185, 120), 1), BorderFactory.createEmptyBorder(8, 10, 8, 10)));
                 list.add(lbl);
                 list.add(Box.createVerticalStrut(2));
             }
