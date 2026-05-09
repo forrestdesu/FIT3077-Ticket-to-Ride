@@ -90,8 +90,8 @@ public class DrawTrainCardController {
         drawModeActive = true;
         drawsUsedThisTurn = 0;
 
-        // Lock all other action buttons immediately — player has committed to drawing cards
-        turnController.onActionStarted();
+        // Do NOT lock buttons yet — player can still change their mind until they
+        // actually draw their first card. Buttons are locked after the first draw.
         mainFrame.setTitle("London Map - Draw a card (click a face-up card or the deck)");
     }
 
@@ -124,6 +124,11 @@ public class DrawTrainCardController {
         faceUp.remove(index);
         Player currentPlayer = gameEngine.getCurrentPlayer();
         currentPlayer.getPlayerhand().addCard(selectedCard);
+
+        // Lock other action buttons now that the player has committed to drawing
+        if (drawsUsedThisTurn == 0) {
+            turnController.onActionStarted();
+        }
 
         gameEngine.refillFaceUpCards();
         drawsUsedThisTurn++;
@@ -164,6 +169,12 @@ public class DrawTrainCardController {
 
         Player currentPlayer = gameEngine.getCurrentPlayer();
         currentPlayer.getPlayerhand().addCard(drawnCard);
+
+        // Lock other action buttons now that the player has committed to drawing
+        if (drawsUsedThisTurn == 0) {
+            turnController.onActionStarted();
+        }
+
         drawsUsedThisTurn++;
 
         if (drawsUsedThisTurn >= MAX_DRAWS_PER_TURN) {
@@ -186,6 +197,16 @@ public class DrawTrainCardController {
                     "You cannot take a face-up Locomotive as your second card."
                             + " Draw from the deck or pick a regular card.");
         }
+    }
+
+    /**
+     * Cancels draw mode without locking buttons or completing the action.
+     * Called when the player clicks a different action button after entering draw mode.
+     */
+    public void cancelDrawMode() {
+        drawModeActive = false;
+        drawsUsedThisTurn = 0;
+        mainFrame.setTitle("London Map - Game On");
     }
 
     /**
