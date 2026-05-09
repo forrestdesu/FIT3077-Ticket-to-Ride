@@ -16,7 +16,6 @@ public class ClaimRouteController {
     private final GameEngine gameEngine;
     private final TurnController turnController;
     private final ClaimHistory claimHistory;
-    private boolean claimModeActive;
 
     public ClaimRouteController(MainFrame mainFrame, GameEngine gameEngine,
                                 TurnController turnController) {
@@ -24,7 +23,6 @@ public class ClaimRouteController {
         this.gameEngine = gameEngine;
         this.turnController = turnController;
         this.claimHistory = new ClaimHistory();
-        this.claimModeActive = false;
         wireListeners();
     }
 
@@ -32,24 +30,41 @@ public class ClaimRouteController {
         mainFrame.getClaimRouteButton().addActionListener(e -> handleClaimRouteClick());
     }
 
+    /**
+     * Called when the player clicks the "Claim Route" button.
+     * The player should have already clicked a route on the board.
+     * Shows a confirmation popup, then validates and executes the claim.
+     */
     private void handleClaimRouteClick() {
-        if (!claimModeActive) {
-            claimModeActive = true;
-            mainFrame.setTitle(
-                    "London Map - Click a route on the board, then press Claim Route again");
+        // Check if the player has selected a route on the board
+        Route selectedRoute = mainFrame.getBoardPanel().getSelectedRoute();
+
+        if (selectedRoute == null) {
+            JOptionPane.showMessageDialog(mainFrame,
+                    "Please click a route on the board first, then press Claim Route.",
+                    "No Route Selected", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        Route selectedRoute = mainFrame.getBoardPanel().getSelectedRoute();
-        if (selectedRoute == null) {
-            JOptionPane.showMessageDialog(mainFrame,
-                    "Please click a route on the board first.",
-                    "No Route Selected", JOptionPane.WARNING_MESSAGE);
+        // Show confirmation popup with route details
+        String routeInfo = selectedRoute.getCity1().getName()
+                + " → " + selectedRoute.getCity2().getName()
+                + " (length " + selectedRoute.getRouteLength() + ", "
+                + selectedRoute.getRouteColor() + ")";
+
+        int confirm = JOptionPane.showConfirmDialog(mainFrame,
+                "Are you sure you want to claim this route?\n\n" + routeInfo,
+                "Confirm Claim Route",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+
+        if (confirm != JOptionPane.YES_OPTION) {
             return;
         }
 
         Player currentPlayer = gameEngine.getCurrentPlayer();
 
+        // Determine which card colour to use
         TrainCarCard.CardColor colorToUse = determineClaimColor(currentPlayer, selectedRoute);
         if (colorToUse == null) {
             JOptionPane.showMessageDialog(mainFrame,
@@ -58,9 +73,11 @@ public class ClaimRouteController {
             return;
         }
 
+        // COMMAND PATTERN: Create the command
         ClaimRouteCommand command = new ClaimRouteCommand(
                 currentPlayer, selectedRoute, colorToUse);
 
+        // COMMAND PATTERN: Validate the command
         try {
             command.validate();
         } catch (RouteAlreadyClaimed | InsufficientTrainCar e) {
@@ -69,9 +86,13 @@ public class ClaimRouteController {
             return;
         }
 
+        // COMMAND PATTERN: Execute the command
         command.execute(gameEngine.getCardDeck());
+
+        // COMMAND PATTERN: Record in history
         claimHistory.recordClaim(command);
 
+        // Check if any destination tickets are now completed
         List<DestinationTicket> completedTickets = checkTicketCompletion(currentPlayer);
 
         if (!completedTickets.isEmpty()) {
@@ -85,8 +106,8 @@ public class ClaimRouteController {
                     "Ticket Completed!", JOptionPane.INFORMATION_MESSAGE);
         }
 
+        // Clean up UI
         mainFrame.getBoardPanel().clearSelection();
-        claimModeActive = false;
         mainFrame.setTitle("London Map - Game On");
         gameEngine.notifyObservers();
         turnController.onActionCompleted();
@@ -176,18 +197,6 @@ public class ClaimRouteController {
             }
         }
         return validColors;
-    }
-
-    public void cancelClaimMode() {
-        if (claimModeActive) {
-            claimModeActive = false;
-            mainFrame.getBoardPanel().clearSelection();
-            mainFrame.setTitle("London Map - Game On");
-        }
-    }
-
-    public boolean isClaimModeActive() {
-        return claimModeActive;
     }
 
     public ClaimHistory getClaimHistory() {
