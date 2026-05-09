@@ -36,10 +36,16 @@ public class GameEngine {
 
     /**
      * Index of the player whose low train count triggered the final round.
-     * That player has already taken their last turn (the one where they hit <= 2 trains),
-     * so they do NOT get an additional final turn — only the other players do.
+     * After triggering, ALL players (including the triggering player) each get
+     * one final turn. The game ends after the triggering player completes their
+     * own final turn.
+     *
+     * We track the index of the player who plays LAST in the final round,
+     * which is the player immediately BEFORE the triggering player in turn order.
+     * Once that player ends their turn, the game is over.
      */
     private int triggeringPlayerIndex;
+    private int lastFinalTurnPlayerIndex;
 
     // Stored after applyFinalScores() so the summary can reference them
     private int[] longestPathLengths;
@@ -75,6 +81,7 @@ public class GameEngine {
         finalScoresApplied = false;
         lastGameRoundTriggered = false;
         triggeringPlayerIndex = -1;
+        lastFinalTurnPlayerIndex = -1;
         longestPathLengths = null;
     }
 
@@ -131,43 +138,58 @@ public class GameEngine {
      * Advances the turn to the next player and checks end-game conditions.
      *
      * <p>Per the rulebook: when a player ends their turn with 0, 1, or 2 train
-     * pieces remaining, the final round is triggered. Every OTHER player gets
-     * one more turn — the triggering player does not, as they just finished theirs.
-     * The game ends when the turn index returns to the triggering player.
+     * pieces remaining, the final round is triggered. ALL players — including
+     * the triggering player — each get one additional final turn after this.
+     * The game ends after the triggering player completes their own final turn.
+     *
+     * <p>Example (2 players, Player 2 triggers):
+     * <ol>
+     *   <li>Player 2 triggers the final round.</li>
+     *   <li>Player 1 takes their final turn (warned by popup).</li>
+     *   <li>Player 2 takes their final turn (warned by popup).</li>
+     *   <li>Game over — scores displayed.</li>
+     * </ol>
      */
     public void nextPlayerTurn() {
         Player current = getCurrentPlayer();
 
-        // Trigger the final round the first time any player ends their turn at <= 2 trains
+        // Trigger the final round the first time any player ends their turn at <= 2 trains.
         if (!lastGameRoundTriggered && current.getTrainPiecesRemaining() <= 2) {
             lastGameRoundTriggered = true;
             triggeringPlayerIndex = currentPlayerIndex;
-        }
-
-        currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
-
-        // Game ends when the turn wraps back to the triggering player —
-        // all other players have now had their one final turn.
-        if (lastGameRoundTriggered && currentPlayerIndex == triggeringPlayerIndex) {
+            // lastFinalTurnPlayerIndex is the triggering player — the game ends
+            // after they complete their OWN additional final turn (after all other
+            // players have also had theirs). We use a separate flag to know we
+            // have already passed the triggering turn once.
+            lastFinalTurnPlayerIndex = currentPlayerIndex;
+        } else if (lastGameRoundTriggered && currentPlayerIndex == lastFinalTurnPlayerIndex) {
+            // The triggering player has now completed their additional final turn —
+            // all other players already went, so the game is over.
             gameOver = true;
         }
+
+        // Advance to the next player
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
 
         notifyObservers();
     }
 
     /**
-     * Returns {@code true} if the current player should receive a "final turn" warning.
+     * Returns {@code true} if the current player should be shown a "final turn" warning.
      *
-     * <p>The triggering player already took their last turn (the one that dropped
-     * them to <= 2 trains), so they are excluded. Only the players who come
-     * AFTER the triggering player in turn order get the warning.
+     * <p>All players receive a final turn warning — including the triggering player
+     * when the turn comes back around to them for their own additional final turn.
+     * The only time this returns false for the triggering player is on the turn
+     * where they actually triggered the final round (handled by the else-if branch
+     * in nextPlayerTurn, so that turn never reaches this check as a "final turn").
      */
     public boolean isCurrentPlayerOnFinalTurn() {
+        // No final round in progress, or the game is already over
         if (!lastGameRoundTriggered || gameOver) {
             return false;
         }
-        // The triggering player does not get an extra final turn
-        return currentPlayerIndex != triggeringPlayerIndex;
+        // All players in the final round get a warning
+        return true;
     }
 
     /**
