@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Player {
-    public static final int STARTING_TRAIN_PIECES = 17;
+    public static final int STARTING_TRAIN_PIECES = 5;
     public static final int INITIAL_HAND_SIZE_FOR_TRAIN_CARDS = 45;
 
     private final String playerName;

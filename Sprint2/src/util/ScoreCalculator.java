@@ -16,10 +16,6 @@ import java.util.List;
  *   <li>-points for every incomplete Destination Ticket.</li>
  *   <li>+10 bonus points for the player(s) with the longest continuous path.</li>
  * </ol>
- *
- * <p>Route points and completed-ticket points are already added to
- * {@code player.getPlayerScore()} during gameplay, so this class only needs to
- * apply the <em>deductions</em> for incomplete tickets and the longest-path bonus.
  */
 public class ScoreCalculator {
 
@@ -28,26 +24,24 @@ public class ScoreCalculator {
 
     /**
      * Applies end-of-game score adjustments (incomplete ticket deductions +
-     * longest-path bonus) to all players in the provided list.
-     *
-     * <p>Call this exactly once when the game ends, before displaying final scores.
+     * longest-path bonus) to all players.
      *
      * @param players ordered list of all players
+     * @return int[] of each player's longest path length, in the same order as the players list
      */
-    public static void applyFinalScores(List<Player> players) {
+    public static int[] applyFinalScores(List<Player> players) {
         applyIncompleteTicketDeductions(players);
-        applyLongestPathBonus(players);
+        return applyLongestPathBonus(players);
     }
 
     /**
      * Deducts points for any destination ticket that has not been completed.
-     * Completed tickets were already awarded during gameplay; this handles the penalty side.
+     * Re-checks completion one final time in case the last claimed route finished it.
      */
     private static void applyIncompleteTicketDeductions(List<Player> players) {
         for (Player player : players) {
             for (DestinationTicket ticket : player.getPlayerTickets()) {
                 if (!ticket.isCompleted()) {
-                    // Re-check completion in case the last route claimed finished it
                     if (TicketCompletionChecker.isTicketCompleted(player, ticket)) {
                         ticket.setCompleted(true);
                         player.adjustPlayerScore(ticket.getPoints());
@@ -62,10 +56,12 @@ public class ScoreCalculator {
     /**
      * Awards the 10-point longest-path bonus to the player(s) with the longest
      * continuous path. In case of a tie, all tied players receive the bonus.
+     *
+     * @return int[] of path lengths indexed by player position
      */
-    private static void applyLongestPathBonus(List<Player> players) {
-        int maxPath = 0;
+    private static int[] applyLongestPathBonus(List<Player> players) {
         int[] pathLengths = new int[players.size()];
+        int maxPath = 0;
 
         for (int i = 0; i < players.size(); i++) {
             pathLengths[i] = LongestPathCalculator.calculate(players.get(i));
@@ -81,6 +77,8 @@ public class ScoreCalculator {
                 }
             }
         }
+
+        return pathLengths;
     }
 
     /** Convenience: points scored for claiming a route of the given length. */

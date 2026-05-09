@@ -1,6 +1,7 @@
 package src.model;
 
 import src.interfaces.GameObserver;
+import src.util.LongestPathCalculator;
 import src.util.MapDataHandler;
 import src.util.ScoreCalculator;
 
@@ -32,7 +33,16 @@ public class GameEngine {
     private boolean gameOver;
     private boolean finalScoresApplied;
     private boolean lastGameRoundTriggered;
-    private int lastGameRoundStartPlayerIndex;
+
+    /**
+     * Index of the player whose low train count triggered the final round.
+     * That player has already taken their last turn (the one where they hit <= 2 trains),
+     * so they do NOT get an additional final turn — only the other players do.
+     */
+    private int triggeringPlayerIndex;
+
+    // Stored after applyFinalScores() so the summary can reference them
+    private int[] longestPathLengths;
 
     public GameEngine(List<String> playerName) {
         if (playerName == null || playerName.size() < 2) {
@@ -64,7 +74,8 @@ public class GameEngine {
         gameOver = false;
         finalScoresApplied = false;
         lastGameRoundTriggered = false;
-        lastGameRoundStartPlayerIndex = -1;
+        triggeringPlayerIndex = -1;
+        longestPathLengths = null;
     }
 
     private void setupInitialPlayerHand() {
@@ -84,13 +95,9 @@ public class GameEngine {
         for (int attempt = 0; attempt < 10; attempt++) {
             int locomotiveCount = 0;
             for (TrainCarCard carCard : faceUpCards) {
-                if (carCard.isLocomotive()) {
-                    locomotiveCount++;
-                }
+                if (carCard.isLocomotive()) locomotiveCount++;
             }
-            if (locomotiveCount < 3) {
-                break;
-            }
+            if (locomotiveCount < 3) break;
             for (TrainCarCard carCard : faceUpCards) {
                 cardDeck.discardCard(carCard);
             }
@@ -123,23 +130,25 @@ public class GameEngine {
     /**
      * Advances the turn to the next player and checks end-game conditions.
      *
-     * <p>Per the rulebook: when a player ends their turn with 0, 1, or 2 train pieces
-     * remaining, the final round is triggered. Every player (including that player)
-     * gets exactly one more turn, then the game ends.
+     * <p>Per the rulebook: when a player ends their turn with 0, 1, or 2 train
+     * pieces remaining, the final round is triggered. Every OTHER player gets
+     * one more turn — the triggering player does not, as they just finished theirs.
+     * The game ends when the turn index returns to the triggering player.
      */
     public void nextPlayerTurn() {
         Player current = getCurrentPlayer();
 
-        // Trigger the final round the first time any player drops to <= 2 trains
+        // Trigger the final round the first time any player ends their turn at <= 2 trains
         if (!lastGameRoundTriggered && current.getTrainPiecesRemaining() <= 2) {
             lastGameRoundTriggered = true;
-            lastGameRoundStartPlayerIndex = currentPlayerIndex;
+            triggeringPlayerIndex = currentPlayerIndex;
         }
 
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
 
-        // The game ends once the turn wraps back to the player who triggered the last round
-        if (lastGameRoundTriggered && currentPlayerIndex == lastGameRoundStartPlayerIndex) {
+        // Game ends when the turn wraps back to the triggering player —
+        // all other players have now had their one final turn.
+        if (lastGameRoundTriggered && currentPlayerIndex == triggeringPlayerIndex) {
             gameOver = true;
         }
 
@@ -147,65 +156,71 @@ public class GameEngine {
     }
 
     /**
-     * Returns {@code true} if the current player is taking their final turn.
-     * Used by TurnController to show the "final turn" warning popup before
-     * the player performs any action.
+     * Returns {@code true} if the current player should receive a "final turn" warning.
+     *
+     * <p>The triggering player already took their last turn (the one that dropped
+     * them to <= 2 trains), so they are excluded. Only the players who come
+     * AFTER the triggering player in turn order get the warning.
      */
     public boolean isCurrentPlayerOnFinalTurn() {
-        return lastGameRoundTriggered && !gameOver;
+        if (!lastGameRoundTriggered || gameOver) {
+            return false;
+        }
+        // The triggering player does not get an extra final turn
+        return currentPlayerIndex != triggeringPlayerIndex;
     }
 
     /**
-     * Applies final scoring (incomplete ticket deductions + longest-path bonus)
-     * exactly once, then returns the score summary as a formatted string for display.
-     *
-     * @return multi-line summary string suitable for a JOptionPane message
+     * Applies final scoring exactly once, then builds and returns the full
+     * score summary string (with longest-path breakdown) for display.
      */
     public String applyAndBuildFinalScoreSummary() {
         if (!finalScoresApplied) {
-            ScoreCalculator.applyFinalScores(players);
+            longestPathLengths = ScoreCalculator.applyFinalScores(players);
             finalScoresApplied = true;
         }
 
-        // Find winner(s)
-        int maxScore = Integer.MIN_VALUE;
-        int maxTickets = -1;
-        for (Player p : players) {
-            if (p.getPlayerScore() > maxScore) {
-                maxScore = p.getPlayerScore();
-                maxTickets = completedTicketCount(p);
-            } else if (p.getPlayerScore() == maxScore) {
-                int tc = completedTicketCount(p);
-                if (tc > maxTickets) {
-                    maxTickets = tc;
-                }
-            }
+        int maxPath = 0;
+        for (int len : longestPathLengths) {
+            if (len > maxPath) maxPath = len;
         }
 
-        // Determine winner(s) applying tie-break rules from rulebook:
-        // 1. Most points; 2. Most completed tickets; 3. Longest path (already in score)
+        // Determine winner: most points, then most completed tickets (rulebook tie-break)
         Player winner = players.get(0);
         for (Player p : players) {
             if (p.getPlayerScore() > winner.getPlayerScore()) {
                 winner = p;
-            } else if (p.getPlayerScore() == winner.getPlayerScore()) {
-                if (completedTicketCount(p) > completedTicketCount(winner)) {
-                    winner = p;
-                }
+            } else if (p.getPlayerScore() == winner.getPlayerScore()
+                    && completedTicketCount(p) > completedTicketCount(winner)) {
+                winner = p;
             }
         }
 
         StringBuilder sb = new StringBuilder();
         sb.append("═══════════════════════════════\n");
-        sb.append("        GAME OVER — FINAL SCORES\n");
+        sb.append("    GAME OVER — FINAL SCORES\n");
         sb.append("═══════════════════════════════\n\n");
 
-        for (Player p : players) {
+        for (int i = 0; i < players.size(); i++) {
+            Player p = players.get(i);
+            int pathLen = longestPathLengths[i];
+            boolean hasLongest = pathLen == maxPath && maxPath > 0;
+
             sb.append("▶  ").append(p.getPlayerName()).append("\n");
-            sb.append("   Route points:      ").append(routePointsFor(p)).append("\n");
+            sb.append("   Route points:         ").append(routePointsFor(p)).append("\n");
             appendTicketBreakdown(sb, p);
-            sb.append("   Trains remaining:  ").append(p.getTrainPiecesRemaining()).append("\n");
-            sb.append("   TOTAL SCORE:       ").append(p.getPlayerScore()).append(" pts\n");
+
+            sb.append("   Longest path:         ")
+                    .append(pathLen).append(" segments");
+            if (hasLongest) {
+                sb.append("  →  +").append(ScoreCalculator.LONGEST_PATH_BONUS)
+                        .append(" pts bonus 🏅");
+            }
+            sb.append("\n");
+
+            sb.append("   Trains remaining:     ").append(p.getTrainPiecesRemaining()).append("\n");
+            sb.append("   ──────────────────────────\n");
+            sb.append("   TOTAL SCORE:          ").append(p.getPlayerScore()).append(" pts\n");
             sb.append("\n");
         }
 
@@ -217,19 +232,16 @@ public class GameEngine {
         return sb.toString();
     }
 
-    /** Counts how many destination tickets the player has completed. */
+    // ── Private helpers ───────────────────────────────────────────────────────
+
     private int completedTicketCount(Player player) {
         int count = 0;
-        for (src.model.DestinationTicket t : player.getPlayerTickets()) {
+        for (DestinationTicket t : player.getPlayerTickets()) {
             if (t.isCompleted()) count++;
         }
         return count;
     }
 
-    /**
-     * Calculates the route-only points for a player by summing points for each
-     * claimed route. Used only for the final score breakdown display.
-     */
     private int routePointsFor(Player player) {
         int total = 0;
         for (Route route : player.getClaimedRoutes()) {
@@ -238,17 +250,16 @@ public class GameEngine {
         return total;
     }
 
-    /** Appends per-ticket breakdown lines to the summary string builder. */
     private void appendTicketBreakdown(StringBuilder sb, Player player) {
-        for (src.model.DestinationTicket ticket : player.getPlayerTickets()) {
-            String status = ticket.isCompleted() ? "✓ +" : "✗ -";
+        for (DestinationTicket ticket : player.getPlayerTickets()) {
+            String status = ticket.isCompleted() ? "✓ +" : "✗  -";
             sb.append("   Ticket ").append(status).append(ticket.getPoints())
                     .append(" pts  (").append(ticket.getCity1())
                     .append(" ↔ ").append(ticket.getCity2()).append(")\n");
         }
     }
 
-    // ── Getters ──────────────────────────────────────────────────────────────
+    // ── Getters ───────────────────────────────────────────────────────────────
 
     public BoardMap getBoardMap() { return boardMap; }
     public CardDeck getCardDeck() { return cardDeck; }
