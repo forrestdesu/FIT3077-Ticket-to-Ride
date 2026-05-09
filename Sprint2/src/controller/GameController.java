@@ -14,6 +14,7 @@ public class GameController {
     private final TurnController turnController;
     private final DrawTrainCardController drawTrainCardController;
     private final DrawTicketController drawTicketController;
+    private final ClaimRouteController claimRouteController;
 
     /**
      * Constructs the GameController and wires all sub-controllers.
@@ -25,6 +26,6 @@ public class GameController {
         turnController = new TurnController(mainFrame, gameEngine);
         drawTrainCardController = new DrawTrainCardController(mainFrame, gameEngine, turnController);
         drawTicketController = new DrawTicketController(mainFrame, gameEngine, turnController);
-        // ClaimRouteController will be added in a subsequent commit
+        claimRouteController = new ClaimRouteController(mainFrame, gameEngine, turnController);
     }
 }
