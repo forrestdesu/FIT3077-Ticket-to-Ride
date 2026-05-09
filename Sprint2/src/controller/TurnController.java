@@ -18,6 +18,14 @@ import javax.swing.*;
  *
  * <p>Action controllers call {@link #onActionCompleted()} when their action
  * fully finishes. This enables the End Turn button.
+ *
+ * <p>At the end of each turn this controller checks two additional conditions:
+ * <ul>
+ *   <li>If the game has just entered its final round, the <em>next</em> player
+ *       is warned with a popup before they act.</li>
+ *   <li>If the game is over (all final turns taken), final scores are calculated
+ *       and displayed, and the application exits.</li>
+ * </ul>
  */
 public class TurnController {
 
@@ -43,10 +51,9 @@ public class TurnController {
     }
 
     /**
-     * Called by action controllers as soon as the player commits to an action
-     * (e.g. enters draw mode by clicking "Draw Cards" or "Draw Tickets",
-     * or clicks "Claim Route"). Immediately locks all other action buttons
-     * so the player cannot switch to a different action mid-turn.
+     * Called by action controllers as soon as the player commits to an action.
+     * Immediately locks all other action buttons so the player cannot switch
+     * to a different action mid-turn.
      */
     public void onActionStarted() {
         mainFrame.getDrawCardsButton().setEnabled(false);
@@ -95,15 +102,68 @@ public class TurnController {
     }
 
     /**
-     * Advances the turn to the next player and resets all button states.
+     * Advances the turn to the next player, resets button states, then checks
+     * for end-game and final-turn conditions.
      */
     public void endTurn() {
         actionCompletedThisTurn = false;
+
+        // Advance the turn inside the game engine (also sets gameOver flag if needed)
+        gameEngine.nextPlayerTurn();
+
+        // --- Check: is the game now over? ---
+        if (gameEngine.isGameOver()) {
+            showFinalScores();
+            return; // Do not re-enable buttons; game is done
+        }
+
+        // Re-enable action buttons for the next player's turn
         mainFrame.getDrawCardsButton().setEnabled(true);
         mainFrame.getDrawTicketsButton().setEnabled(true);
         mainFrame.getClaimRouteButton().setEnabled(true);
         mainFrame.getEndTurnButton().setEnabled(false);
         mainFrame.setTitle("London Map - Game On");
-        gameEngine.nextPlayerTurn();
+
+        // --- Check: is the next player about to take their final turn? ---
+        if (gameEngine.isCurrentPlayerOnFinalTurn()) {
+            String playerName = gameEngine.getCurrentPlayer().getPlayerName();
+            JOptionPane.showMessageDialog(
+                    mainFrame,
+                    "⚠️  FINAL TURN!\n\n"
+                            + playerName + ", this is your last turn.\n"
+                            + "Make it count — the game ends after you complete your action!",
+                    "Final Turn — " + playerName,
+                    JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    /**
+     * Applies final scoring, builds a score summary, and shows it in a dialog.
+     * After the player dismisses the dialog the application exits cleanly.
+     */
+    private void showFinalScores() {
+        // Disable all action buttons — game is over
+        mainFrame.getDrawCardsButton().setEnabled(false);
+        mainFrame.getDrawTicketsButton().setEnabled(false);
+        mainFrame.getClaimRouteButton().setEnabled(false);
+        mainFrame.getEndTurnButton().setEnabled(false);
+        mainFrame.setTitle("London Map - Game Over!");
+
+        // Notify observers so the board re-paints with final state
+        gameEngine.notifyObservers();
+
+        // Build summary (also applies score adjustments exactly once)
+        String summary = gameEngine.applyAndBuildFinalScoreSummary();
+
+        // Notify observers again so score panel reflects the adjusted totals
+        gameEngine.notifyObservers();
+
+        JOptionPane.showMessageDialog(
+                mainFrame,
+                summary,
+                "Game Over — Final Scores",
+                JOptionPane.INFORMATION_MESSAGE);
+
+        System.exit(0);
     }
 }
