@@ -1,6 +1,7 @@
 package src.controller;
 
 import src.model.GameEngine;
+import src.view.GameStart;
 import src.view.MainFrame;
 
 import javax.swing.*;
@@ -155,15 +156,23 @@ public class TurnController {
         // Build summary (also applies score adjustments exactly once)
         String summary = gameEngine.applyAndBuildFinalScoreSummary();
 
+        String message = summary + "\n\nWould you like to start a new game?";
+
         // Notify observers again so score panel reflects the adjusted totals
         gameEngine.notifyObservers();
 
-        JOptionPane.showMessageDialog(
+        int response = JOptionPane.showConfirmDialog(
                 mainFrame,
-                summary,
+                message,
                 "Game Over — Final Scores",
-                JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
 
-        System.exit(0);
+        if (response == JOptionPane.YES_OPTION) {
+            new GameStart();
+        } else {
+            // If they click 'No' or close the dialog, exit the app
+            System.exit(0);
+        }
     }
 }
