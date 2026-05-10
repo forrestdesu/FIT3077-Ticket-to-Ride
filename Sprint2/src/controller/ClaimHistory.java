@@ -6,21 +6,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * design pattern: Command Pattern — history component
- *
- * stores the history of all successfully executed ClaimRouteCommands
- *
- * after a ClaimRouteCommand is validated and executed, i want to store it here
- * giving me a complete record of
- * which player claimed which route
- * what cards they used to pay for it
- * the order in which routes were claimed
- *
- */
 public class ClaimHistory {
 
-    // The list of all executed claim commands, in chronological order
     private final List<ClaimRouteCommand> executedCommands;
 
     /** create an empty claim history. */
@@ -48,7 +35,6 @@ public class ClaimHistory {
     /**
      * return only the claims made by the specific player
      * for displaying a player's claim history.
-     *
 
      * player: the player to filter by
      * return: list of that player's claim commands

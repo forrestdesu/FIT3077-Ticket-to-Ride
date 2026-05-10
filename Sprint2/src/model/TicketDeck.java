@@ -8,7 +8,7 @@ public class TicketDeck {
     public final List<DestinationTicket> tickets;
 
     public TicketDeck(List<DestinationTicket> tickets){
-        this.tickets = new ArrayList<>(tickets);
+        this.ticwkets = new ArrayList<>(tickets);
         Collections.shuffle(tickets);
     }
 

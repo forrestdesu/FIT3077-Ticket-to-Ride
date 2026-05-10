@@ -6,42 +6,13 @@ import src.view.MainFrame;
 
 import javax.swing.*;
 
-/**
- * Controller responsible for managing turn progression.
- *
- * <p>Per the rulebook, a player MUST perform exactly one action per turn
- * (draw train cards, draw destination tickets, or claim a route). A player
- * cannot end their turn without completing an action.
- *
- * <p>Action controllers call {@link #onActionStarted()} as soon as the player
- * commits to an action (e.g. enters draw mode). This immediately locks all
- * other action buttons so the player cannot switch actions mid-turn.
- *
- * <p>Action controllers call {@link #onActionCompleted()} when their action
- * fully finishes. This enables the End Turn button.
- *
- * <p>At the end of each turn this controller checks two additional conditions:
- * <ul>
- *   <li>If the game has just entered its final round, the <em>next</em> player
- *       is warned with a popup before they act.</li>
- *   <li>If the game is over (all final turns taken), final scores are calculated
- *       and displayed, and the application exits.</li>
- * </ul>
- */
 public class TurnController {
 
     private final MainFrame mainFrame;
     private final GameEngine gameEngine;
 
-    /** Whether the current player has completed a valid action this turn. */
     private boolean actionCompletedThisTurn;
 
-    /**
-     * Constructs the TurnController and sets the initial button states.
-     *
-     * @param mainFrame  the main game window
-     * @param gameEngine the central game state
-     */
     public TurnController(MainFrame mainFrame, GameEngine gameEngine) {
         this.mainFrame = mainFrame;
         this.gameEngine = gameEngine;

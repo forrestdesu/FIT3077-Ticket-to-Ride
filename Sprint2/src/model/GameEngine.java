@@ -33,17 +33,6 @@ public class GameEngine {
     private boolean gameOver;
     private boolean finalScoresApplied;
     private boolean lastGameRoundTriggered;
-
-    /**
-     * Index of the player whose low train count triggered the final round.
-     * After triggering, ALL players (including the triggering player) each get
-     * one final turn. The game ends after the triggering player completes their
-     * own final turn.
-     *
-     * We track the index of the player who plays LAST in the final round,
-     * which is the player immediately BEFORE the triggering player in turn order.
-     * Once that player ends their turn, the game is over.
-     */
     private int triggeringPlayerIndex;
     private int lastFinalTurnPlayerIndex;
 
@@ -134,22 +123,6 @@ public class GameEngine {
         }
     }
 
-    /**
-     * Advances the turn to the next player and checks end-game conditions.
-     *
-     * <p>Per the rulebook: when a player ends their turn with 0, 1, or 2 train
-     * pieces remaining, the final round is triggered. ALL players — including
-     * the triggering player — each get one additional final turn after this.
-     * The game ends after the triggering player completes their own final turn.
-     *
-     * <p>Example (2 players, Player 2 triggers):
-     * <ol>
-     *   <li>Player 2 triggers the final round.</li>
-     *   <li>Player 1 takes their final turn (warned by popup).</li>
-     *   <li>Player 2 takes their final turn (warned by popup).</li>
-     *   <li>Game over — scores displayed.</li>
-     * </ol>
-     */
     public void nextPlayerTurn() {
         Player current = getCurrentPlayer();
 
@@ -174,15 +147,6 @@ public class GameEngine {
         notifyObservers();
     }
 
-    /**
-     * Returns {@code true} if the current player should be shown a "final turn" warning.
-     *
-     * <p>All players receive a final turn warning — including the triggering player
-     * when the turn comes back around to them for their own additional final turn.
-     * The only time this returns false for the triggering player is on the turn
-     * where they actually triggered the final round (handled by the else-if branch
-     * in nextPlayerTurn, so that turn never reaches this check as a "final turn").
-     */
     public boolean isCurrentPlayerOnFinalTurn() {
         // No final round in progress, or the game is already over
         if (!lastGameRoundTriggered || gameOver) {

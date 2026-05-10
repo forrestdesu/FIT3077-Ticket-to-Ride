@@ -73,11 +73,9 @@ public class ClaimRouteController {
             return;
         }
 
-        // COMMAND PATTERN: Create the command
         ClaimRouteCommand command = new ClaimRouteCommand(
                 currentPlayer, selectedRoute, colorToUse);
 
-        // COMMAND PATTERN: Validate the command
         try {
             command.validate();
         } catch (RouteAlreadyClaimed | InsufficientTrainCar e) {
@@ -86,12 +84,10 @@ public class ClaimRouteController {
             return;
         }
 
-        // COMMAND PATTERN: Execute the command
         // Lock other action buttons now that claim is confirmed and validated
         turnController.onActionStarted();
         command.execute(gameEngine.getCardDeck());
 
-        // COMMAND PATTERN: Record in history
         claimHistory.recordClaim(command);
 
         // Check if any destination tickets are now completed

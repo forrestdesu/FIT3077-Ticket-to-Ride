@@ -112,22 +112,18 @@ public class MainFrame extends JFrame {
         setVisible(true);
     }
 
-    /** Returns the board panel for route selection. */
     public BoardPanel getBoardPanel() {
         return boardPanel;
     }
 
-    /** Returns the "Draw Cards" action button. */
     public JButton getDrawCardsButton() {
         return actionsPanel.getDrawCardsButton();
     }
 
-    /** Returns the "Draw Tickets" action button. */
     public JButton getDrawTicketsButton() {
         return actionsPanel.getDrawTicketsButton();
     }
 
-    /** Returns the "Claim Route" action button. */
     public JButton getClaimRouteButton() {
         return actionsPanel.getClaimRouteButton();
     }
@@ -136,28 +132,18 @@ public class MainFrame extends JFrame {
         return actionsPanel.getEndTurnButton();
     }
 
-    /** Returns one of the 5 face-up card buttons by index (0–4). */
     public JButton getFaceUpButton(int index) {
         return faceUpPanel.getCardButton(index);
     }
 
-    /**
-     * Returns the blind draw deck button so controllers can attach listeners.
-     * Previously only accessible inside DeckPanel.
-     */
     public JButton getTrainCarDeckButton() {
         return deckPanel.getTrainCarDeckButton();
     }
 
-    /**
-     * Returns the destination ticket deck button so DrawTicketController
-     * can attach a listener to it.
-     */
     public JButton getDestinationDeckButton() {
         return deckPanel.getDestinationDeckButton();
     }
 
-    /** Returns the game engine. */
     public GameEngine getEngine() {
         return gameEngine;
     }

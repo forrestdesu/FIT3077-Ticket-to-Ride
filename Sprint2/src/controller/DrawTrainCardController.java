@@ -9,24 +9,6 @@ import src.view.MainFrame;
 
 import javax.swing.*;
 import java.util.List;
-
-/**
- * Controller responsible for handling the "Draw Train Car Cards" action.
- *
- * <p>Two-step flow:
- * <ol>
- *   <li>Player clicks "Draw Cards" to enter draw mode — all other action
- *       buttons are immediately locked via {@link TurnController#onActionStarted()}.</li>
- *   <li>Player clicks a face-up card or the blind deck to draw (up to 2 cards).</li>
- * </ol>
- *
- * <p>Locomotive rules enforced:
- * <ul>
- *   <li>Taking a face-up Locomotive costs the entire draw phase (only 1 card).</li>
- *   <li>A face-up Locomotive cannot be taken as the 2nd card.</li>
- *   <li>A Locomotive drawn blindly still allows a second draw.</li>
- * </ul>
- */
 public class DrawTrainCardController {
 
     private static final int MAX_DRAWS_PER_TURN = 2;
@@ -38,13 +20,6 @@ public class DrawTrainCardController {
     private int drawsUsedThisTurn;
     private boolean drawModeActive;
 
-    /**
-     * Constructs the controller and wires all button listeners.
-     *
-     * @param mainFrame      the main game window
-     * @param gameEngine     the central game state
-     * @param turnController the turn controller to notify on action start/complete
-     */
     public DrawTrainCardController(MainFrame mainFrame, GameEngine gameEngine,
                                    TurnController turnController) {
         this.mainFrame = mainFrame;
@@ -185,12 +160,7 @@ public class DrawTrainCardController {
         }
     }
 
-    /**
-     * Validates whether a face-up card can legally be drawn.
-     *
-     * @param card the face-up card the player wants to take
-     * @throws TrainCardDrawError if the draw is illegal
-     */
+    /** Validates whether a face-up card can legally be drawn.*/
     private void validateFaceUpDraw(TrainCarCard card) throws TrainCardDrawError {
         if (drawsUsedThisTurn == 1 && card.isLocomotive()) {
             throw new TrainCardDrawError(

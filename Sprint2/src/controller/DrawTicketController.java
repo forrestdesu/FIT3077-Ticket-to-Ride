@@ -12,20 +12,6 @@ import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Controller responsible for handling the "Draw Destination Tickets" action.
- *
- * <p>Two-step flow:
- * <ol>
- *   <li>Player clicks "Draw Tickets" to enter draw mode — all other action
- *       buttons are immediately locked via {@link TurnController#onActionStarted()}.</li>
- *   <li>Player clicks the Destination Ticket deck button to draw and open the dialog.</li>
- * </ol>
- *
- * <p>Closing with X or Cancel returns all tickets to the bottom of the deck
- * and does NOT complete the action — the player must choose a different action.
- * Action buttons are re-enabled on cancel.
- */
 public class DrawTicketController {
 
     private final MainFrame mainFrame;
@@ -34,13 +20,6 @@ public class DrawTicketController {
 
     private boolean drawModeActive;
 
-    /**
-     * Constructs the controller and wires all button listeners.
-     *
-     * @param mainFrame      the main game window
-     * @param gameEngine     the central game state
-     * @param turnController the turn controller to notify on action start/complete
-     */
     public DrawTicketController(MainFrame mainFrame, GameEngine gameEngine,
                                 TurnController turnController) {
         this.mainFrame = mainFrame;
