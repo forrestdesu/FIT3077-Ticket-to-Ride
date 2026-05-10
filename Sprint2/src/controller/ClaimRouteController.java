@@ -164,12 +164,12 @@ public class ClaimRouteController {
 
     private TrainCarCard.CardColor routeColorToCardColor(Route.RouteColor routeColor) {
         switch (routeColor) {
-            case RED: return TrainCarCard.CardColor.RED;
+//            case RED: return TrainCarCard.CardColor.RED;
             case BLUE: return TrainCarCard.CardColor.BLUE;
             case GREEN: return TrainCarCard.CardColor.GREEN;
             case YELLOW: return TrainCarCard.CardColor.YELLOW;
             case BLACK: return TrainCarCard.CardColor.BLACK;
-            case WHITE: return TrainCarCard.CardColor.WHITE;
+//            case WHITE: return TrainCarCard.CardColor.WHITE;
             case ORANGE: return TrainCarCard.CardColor.ORANGE;
             case PINK: return TrainCarCard.CardColor.PINK;
             default: return null;

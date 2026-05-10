@@ -2,7 +2,7 @@ package src.model;
 
 public class TrainCarCard {
     public enum CardColor{
-        RED, BLUE, GREEN, YELLOW, BLACK, WHITE, ORANGE, PINK, LOCOMOTIVE
+        BLUE, GREEN, YELLOW, BLACK, ORANGE, PINK, LOCOMOTIVE
     }
 
     private final CardColor cardColor;
