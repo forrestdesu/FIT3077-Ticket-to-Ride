@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class CardDeck {
-    private static final int CARDS_PER_COLOR = 12;
-    private static final int LOCOMOTIVE_CARDS = 14;
+    private static final int CARDS_PER_COLOR = 6;
+    private static final int LOCOMOTIVE_CARDS = 8;
 
     private final List<TrainCarCard> drawCardPile;
     private final List<TrainCarCard> discardCardPile;
@@ -19,7 +19,7 @@ public class CardDeck {
     }
 
     public void buildCardDeck(){
-        TrainCarCard.CardColor [] colors = {TrainCarCard.CardColor.RED, TrainCarCard.CardColor.BLUE, TrainCarCard.CardColor.GREEN, TrainCarCard.CardColor.YELLOW, TrainCarCard.CardColor.BLACK, TrainCarCard.CardColor.WHITE, TrainCarCard.CardColor.ORANGE, TrainCarCard.CardColor.PINK};
+        TrainCarCard.CardColor [] colors = {TrainCarCard.CardColor.BLUE, TrainCarCard.CardColor.GREEN, TrainCarCard.CardColor.YELLOW, TrainCarCard.CardColor.BLACK, TrainCarCard.CardColor.ORANGE, TrainCarCard.CardColor.PINK};
 
         for (TrainCarCard.CardColor color : colors){
             for (int i = 0; i < CARDS_PER_COLOR; i++){

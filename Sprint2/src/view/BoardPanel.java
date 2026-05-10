@@ -254,12 +254,12 @@ public class BoardPanel extends JPanel implements GameObserver {
 
     private Color routeColorToAwt(Route.RouteColor routeColor) {
         switch (routeColor) {
-            case RED:    return new Color(200, 50,  50);
+//            case RED:    return new Color(200, 50,  50);
             case BLUE:   return new Color(50,  100, 200);
             case GREEN:  return new Color(30,  150, 30);
             case YELLOW: return new Color(200, 180, 0);
             case BLACK:  return new Color(40,  40,  40);
-            case WHITE:  return new Color(210, 210, 210);
+//            case WHITE:  return new Color(210, 210, 210);
             case ORANGE: return new Color(220, 110, 20);
             case PINK:   return new Color(210, 80,  150);
             case GREY:   return new Color(150, 150, 150);

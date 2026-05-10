@@ -51,7 +51,7 @@
     { "city1": "TL", "city2": "EC", "color": "Black", "length": 4, "isDouble": false },
     { "city1": "GT", "city2": "WA", "color": "Pink", "length": 2, "isDouble": false },
     { "city1": "GT", "city2": "EC", "color": "Green", "length": 2, "isDouble": false },
-    { "city1": "WA", "city2": "BB", "color": "Red", "length": 1, "isDouble": false },
+    { "city1": "WA", "city2": "BB", "color": "Blue", "length": 1, "isDouble": false },
     { "city1": "WA", "city2": "EC", "color": "Orange", "length": 2, "isDouble": false },
     { "city1": "BB", "city2": "EC", "color": "Yellow", "length": 3, "isDouble": false }
   ],

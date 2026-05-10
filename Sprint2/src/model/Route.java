@@ -3,8 +3,8 @@ package src.model;
 import java.awt.*;
 
 public class Route {
-    public enum RouteColor{
-        RED, BLUE, GREEN, YELLOW, BLACK, WHITE, ORANGE, PINK, GREY
+    public enum RouteColor {
+        BLUE, GREEN, YELLOW, BLACK, ORANGE, PINK, GREY
     }
 
     private final String id;

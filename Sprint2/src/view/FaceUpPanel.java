@@ -64,12 +64,12 @@ public class FaceUpPanel extends JPanel implements GameObserver {
 
     private Color cardColorToAwt(TrainCarCard.CardColor color) {
         switch (color) {
-            case RED:    return new Color(210, 60,  60);
+//            case RED:    return new Color(210, 60,  60);
             case BLUE:   return new Color(60,  110, 210);
             case GREEN:  return new Color(50,  160, 60);
             case YELLOW: return new Color(220, 190, 20);
             case BLACK:  return new Color(40,  40,  40);
-            case WHITE:  return new Color(220, 220, 220);
+//            case WHITE:  return new Color(220, 220, 220);
             case ORANGE: return new Color(220, 120, 30);
             case PINK:   return new Color(210, 100, 160);
             case LOCOMOTIVE:   return new Color(140, 80,  200);
@@ -78,7 +78,7 @@ public class FaceUpPanel extends JPanel implements GameObserver {
     }
 
     private Color textColorFor(TrainCarCard.CardColor color) {
-        return (color == TrainCarCard.CardColor.WHITE || color == TrainCarCard.CardColor.YELLOW) ? Color.BLACK : Color.WHITE;
+        return (color == TrainCarCard.CardColor.YELLOW) ? Color.BLACK : Color.WHITE;
     }
 
     @Override
