@@ -66,6 +66,7 @@ public class Route {
         return city1.getName().equals(cityName) ? city2.getName() : city2.getName().equals(cityName) ? city1.getName() : null;
     }
 
+    //the relative point to get after claiming a route
     public static int pointsForRouteLength(int routeLength){
         return switch (routeLength) {
             case 1 -> 1;

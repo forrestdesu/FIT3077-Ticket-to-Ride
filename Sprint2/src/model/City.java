@@ -15,6 +15,8 @@ public class City {
 
     public String getId() { return id; }
     public String getName() { return name; }
+
+    //parameters used to map cities on the board
     public double getxPercent() { return xPercent; }
     public double getyPercent() { return yPercent; }
 

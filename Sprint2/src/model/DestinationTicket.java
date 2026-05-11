@@ -17,6 +17,7 @@ public class DestinationTicket {
     public String getCity2() { return city2; }
     public int getPoints() { return points; }
 
+    //helper method to help implement constraints
     public boolean isCompleted() { return completed; }
     public void setCompleted(boolean completed) { this.completed = completed; }
 

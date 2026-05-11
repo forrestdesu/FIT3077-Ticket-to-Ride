@@ -19,6 +19,7 @@ public class MainFrame extends JFrame {
 
     private final GameEngine gameEngine;
 
+    // contains the complex grid bag contrainsts to build the whole UI that contains all the panels
     public MainFrame(List<String> playerNames) {
         setTitle("London Map - Game On");
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);

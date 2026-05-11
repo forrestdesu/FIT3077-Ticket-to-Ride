@@ -33,6 +33,7 @@ public class PlayerHandPanel extends JPanel implements GameObserver {
         refresh();
     }
 
+    //this is method that is run by the observer itself and it updates the UI
     private void refresh() {
         removeAll();
 

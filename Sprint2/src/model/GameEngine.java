@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GameEngine {
+    //fixed values
     public static final int FACE_UP_CARD_COUNT = 5;
     public static final int INITIAL_TRAIN_CARDS_IN_HAND = 4;
     public static final int MIN_INITIAL_TICKETS_TO_KEEP = 2;
@@ -22,6 +23,7 @@ public class GameEngine {
             new Color(255, 193, 7)
     };
 
+    //all the related elements that the game engine controls and gets feedback from
     private final BoardMap boardMap;
     private final CardDeck cardDeck;
     private final TicketDeck ticketDeck;
@@ -87,6 +89,7 @@ public class GameEngine {
         enforceLocomotiveRule();
     }
 
+    //this is an automatic reset of the face up cards, this allows the reshuffling of up to 10 times, so that we dont have more than 3 locomotives
     private void enforceLocomotiveRule() {
         for (int attempt = 0; attempt < 10; attempt++) {
             int locomotiveCount = 0;
@@ -117,6 +120,7 @@ public class GameEngine {
         observers.add(observer);
     }
 
+    //observers to notify change that update the whole UI
     public void notifyObservers() {
         for (GameObserver observer : observers) {
             observer.onGameStateChanged();

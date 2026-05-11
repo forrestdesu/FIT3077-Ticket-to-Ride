@@ -35,6 +35,7 @@ public class PlayerScorePanel extends JPanel implements GameObserver {
         refresh();
     }
 
+    //this is method that is run by the observer itself and it updates the UI
     private void refresh() {
         List<Player> players = gameEngine.getPlayers();
         Player current = gameEngine.getCurrentPlayer();

@@ -37,7 +37,7 @@ public class DeckPanel extends JPanel implements GameObserver {
         return destinationDeckButton;
     }
 
-    /** Updates both deck button labels with current card counts. */
+    //this is method that is run by the observer itself and it updates the UI
     private void refresh() {
         trainCarDeckButton.setText(
                 "<html><center>Train Car Card<br>Deck ("

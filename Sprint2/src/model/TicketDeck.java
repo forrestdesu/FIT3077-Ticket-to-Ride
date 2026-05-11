@@ -12,6 +12,7 @@ public class TicketDeck {
         Collections.shuffle(tickets);
     }
 
+    //the game will initially pull 3 tickets and then basen on how many are chosen the other are returned to bottom
     public List<DestinationTicket> drawThreeTickets(){
         List<DestinationTicket> drawnTickets = new ArrayList<>();
         int count = Math.min(3, tickets.size());

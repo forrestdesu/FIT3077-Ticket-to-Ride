@@ -39,28 +39,36 @@ public class BoardPanel extends JPanel implements GameObserver {
         });
     }
 
+    //=====All the complex calculations to draw the routes and cities for the map====
+
+    //calculates the starting X position
     private int drawX(){
         return getInsets().left + 10;
     }
 
+    //calculates the starting Y position
     private int drawY(){
         return getInsets().top + 10;
     }
 
+    //calculates the drawable width of the panel.
     private int drawW(){
         Insets insets = getInsets();
         return getWidth() - insets.left - insets.right - 20;
     }
 
+    //calculates the drawable height of the panel.
     private int drawH(){
         Insets insets = getInsets();
         return getHeight() - insets.top - insets.bottom - 20;
     }
 
+    //converts a city's X percentage position into an actual pixel X coordinate on screen.
     private int toPixelX(City city){
         return drawX() + (int) (city.getxPercent() / 100.0 * drawW());
     }
 
+    //converts a city's Y percentage position into an actual pixel X coordinate on screen.
     private int toPixelY(City city){
         return drawY() + (int) (city.getyPercent() / 100.0 * drawH());
     }
@@ -81,6 +89,7 @@ public class BoardPanel extends JPanel implements GameObserver {
         repaint();
     }
 
+    //calculates the distance between the mouse click and the midpoint of a route and for double routes, an offset is applied so both parallel routes can be selected separately.
     private double distToMidpoint(Route route, int mouseX, int mouseY){
         int x1 = toPixelX(route.getCity1());
         int y1 = toPixelY(route.getCity1());
@@ -128,6 +137,7 @@ public class BoardPanel extends JPanel implements GameObserver {
         }
     }
 
+    //more complex calculations to draw the routes using the Graphics2D
     private void drawRoute(Graphics2D g2, Route route){
         int w = getWidth();
         int h = getHeight();
@@ -197,6 +207,7 @@ public class BoardPanel extends JPanel implements GameObserver {
         }
     }
 
+    //method used to show which player has claim the route, it write the name of the player onto the route itself
     private void drawClaimedRoutePlayer(Graphics2D g2, int x1, int y1, int x2, int y2, String playerName) {
         int midX = (x1 + x2) / 2;
         int midY = (y1 + y2) / 2;

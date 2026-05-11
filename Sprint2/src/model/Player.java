@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Player {
+    //fixed values
     public static final int STARTING_TRAIN_PIECES = 17;
     public static final int INITIAL_HAND_SIZE_FOR_TRAIN_CARDS = 45;
 
+    //all elements the player is connected to
     private final String playerName;
     private final Color playerColor;
     private final Hand playerhand;

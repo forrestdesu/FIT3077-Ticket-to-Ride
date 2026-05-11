@@ -39,6 +39,7 @@ public class FaceUpPanel extends JPanel implements GameObserver {
         return faceUpCardsButton.get(index);
     }
 
+    //this is method that is run by the observer itself and it updates the UI
     private void refresh() {
         List<TrainCarCard> faceUp = gameEngine.getFaceUpCards();
         for (int i = 0; i < faceUpCardsButton.size(); i++) {
